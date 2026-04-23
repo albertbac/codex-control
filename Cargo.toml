@@ -1,0 +1,14 @@
+[workspace]
+members = [
+  "apps/desktop/src-tauri",
+  "packages/codex-core",
+  "packages/hook-cli",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+version = "0.1.0"
+authors = ["Albert Bacelar"]
+repository = "https://github.com/albertbac/codex-control"

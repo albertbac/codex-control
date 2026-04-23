@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Codex Control",
+  "version": "0.1.0",
+  "identifier": "com.albertbacelar.codexcontrol",
+  "build": {
+    "beforeDevCommand": "npm --prefix .. run dev",
+    "beforeBuildCommand": "npm --prefix .. run build",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Codex Control",
+        "width": 1520,
+        "height": 960,
+        "minWidth": 1100,
+        "minHeight": 760,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app"],
+    "macOS": {
+      "entitlements": null
+    }
+  }
+}

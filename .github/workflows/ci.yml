@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Linux desktop libs for Tauri build checks
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libgtk-3-dev libayatana-appindicator3-dev
+      - name: Install npm workspace dependencies
+        run: npm install
+      - name: Rust format check
+        run: cargo fmt --all --check
+      - name: Rust tests
+        run: cargo test --workspace
+      - name: Rust clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Frontend lint
+        run: npm run lint
+      - name: Frontend tests
+        run: npm run test
+      - name: Frontend build
+        run: npm run build

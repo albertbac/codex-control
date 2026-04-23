@@ -1,0 +1,18 @@
+{
+  "name": "codex-control",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A local desktop dashboard for monitoring and managing multiple Codex CLI sessions in real time.",
+  "workspaces": [
+    "apps/desktop"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/desktop run dev",
+    "build": "npm --workspace apps/desktop run build",
+    "lint": "npm --workspace apps/desktop run lint && cargo fmt --all --check",
+    "format": "npm --workspace apps/desktop run format && cargo fmt --all",
+    "test": "npm --workspace apps/desktop run test && cargo test --workspace",
+    "tauri:dev": "npm --workspace apps/desktop run tauri:dev",
+    "tauri:build": "npm --workspace apps/desktop run tauri:build"
+  }
+}
