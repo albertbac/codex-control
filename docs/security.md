@@ -1,41 +1,41 @@
 # Security
 
-## Local-first
+## Local-first behavior
 
-Codex Control is local-first.
+Codex Control keeps session data on the local machine.
 
-- session data is stored locally
 - no server sync is required
+- no remote controller is involved
 - no default outbound telemetry is enabled
 
 ## Storage
 
-Persisted data lives in:
+Persisted data lives in the local application data directory:
 
-- SQLite database in the local application data directory
-- JSONL spool fallback in the same local data directory
+- SQLite database for the primary store
+- JSONL spool file when the database is unavailable
 
 ## Hook boundaries
 
-Hooks are guardrails, not a perfect enforcement boundary.
+Hooks are guardrails, not a complete enforcement boundary.
 
 - `PreToolUse` and `PermissionRequest` can deny destructive shell activity that matches configured hooks
 - `PostToolUse` cannot undo work that already ran
 - shell hooks do not imply universal interception of every tool
-- the first release only treats Bash payloads as policy-aware events
+- the current policy logic is scoped to Bash-style payloads
 
 ## Approval safety
 
 Approval requests are never auto-approved by default.
 
-- destructive approval requests are explicitly denied by policy output
-- non-destructive approval requests fall back to the normal Codex approval flow
+- destructive approval requests are denied by policy output
+- non-destructive approval requests fall back to the standard Codex approval flow
 
 ## Secret redaction
 
 Redaction runs before persistence.
 
-Targets include:
+Current targets include:
 
 - likely API keys
 - Bearer tokens
@@ -43,18 +43,18 @@ Targets include:
 - sensitive `.env` values
 - long high-entropy tokens
 
-Redaction is heuristic. Review stored data before sharing the local database.
+Redaction is heuristic. If you plan to share local data, inspect it first.
 
 ## Deleting local data
 
-You can remove local state manually by deleting the application data directory described in `docs/install.md`, or by using the dashboard control that clears the local store.
+You can remove local state by deleting the application data directory described in [install.md](install.md), or by using the dashboard control that clears the local store.
 
 ## Auditing installed hooks
 
-Audit installed hooks by reviewing the file you point Codex to in your config.
+Review the hook file you point Codex to in your local configuration.
 
-Minimum review points:
+Minimum checks:
 
 - `codex-control-hook ingest` is the only ingestion command
-- `codex-control-hook policy` is present only where approval or shell policy is desired
-- no unexpected shell command is executed before or after these entries
+- `codex-control-hook policy` is only present where approval or shell policy is intended
+- no unexpected shell command runs before or after those entries

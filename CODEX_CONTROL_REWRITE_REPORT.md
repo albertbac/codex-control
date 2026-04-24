@@ -1,166 +1,224 @@
 # Codex Control Rewrite Report
 
-## 1. Scope of this pass
+## Summary of this pass
 
-This pass was focused on public-facing finish work before broader disclosure:
+This pass focused on the public-facing finish work before wider disclosure.
 
-- rewrite the README in maintainer voice
-- remove placeholder marketing language
-- replace the screenshot placeholder with an honest status note
-- check naming consistency between the local folder (`codex_control`) and the public repository slug (`codex-control`)
-- run the requested verification commands when the environment allowed it
-- record only real results
+The goals were:
 
-## 2. Naming and repo consistency
+- rewrite the public docs in maintainer voice
+- remove leftover filler language from the public-facing text
+- investigate the failing GitHub Actions run
+- fix the workflow where there was a concrete, mechanical issue
+- record only commands that were actually run
+- keep the hook contract unchanged
 
-There are two names in use, and they now have clear roles:
+## Files changed
 
-- `codex-control`: GitHub repository slug, package naming, binary naming, and product-facing references
-- `codex_control`: local folder name in this machine under `/Volumes/ABacelarHD/Apps Codex/`
+- `README.md`
+- `docs/install.md`
+- `docs/architecture.md`
+- `docs/hooks.md`
+- `docs/security.md`
+- `docs/troubleshooting.md`
+- rewrite report document
+- `.github/workflows/ci.yml`
+- `package.json`
+- unused screenshot SVG removed
 
-That split is intentional and is now described consistently.
+## Text changed
 
-## 3. Editorial changes made
+The README was rewritten to sound like a maintainer describing an actual tool, not a generated pitch.
 
-- `README.md` was rewritten from top to bottom.
-- The screenshot placeholder image was removed.
-- The project description was rewritten around the real developer use case: tracking several Codex CLI sessions at once.
-- Generic checklist language was reduced in favor of direct explanation of the product, the local architecture, and the limits.
+Public docs were reformatted into readable Markdown with explicit headings, clearer shell examples, and shorter sections.
 
-## 4. Technical adjustments made during this pass
+The screenshot image reference was removed. The repo now states only:
 
-- Updated frontend TypeScript config to unblock Vite type resolution.
-- Fixed a nullable timeline load path in the desktop UI.
-- Replaced `replaceAll` in one UI component to avoid an avoidable compatibility issue.
-- Changed the desktop build script to run TypeScript checks without emitting tracked artifacts.
-- Added `package-lock.json` for reproducible npm installs.
-- Updated `.gitignore` to keep TypeScript and Vite build residue out of the repo.
-- Kept the hook contract unchanged.
+> Screenshot coming after the first verified desktop build.
 
-## 5. Commands executed in this environment
+Filler phrases and template-style wording were removed from the public docs in this pass.
 
-All commands below were run from:
+## CI status observed before this pass
 
-```bash
-cd "/Volumes/ABacelarHD/Apps Codex/codex_control"
-```
+The latest published GitHub Actions run inspected during this pass was:
 
-For Node-based commands in this Codex session, the Homebrew toolchain also had to be exposed explicitly:
+- workflow: `ci`
+- run: `#2`
+- commit: `235ad04`
+- status: failure
+- exit code: `100`
+
+GitHub Actions currently fails with exit code 100 on the latest published run inspected during this pass.
+
+The available evidence points to the Ubuntu package installation step in `.github/workflows/ci.yml`.
+
+The previous workflow tried to install both `libappindicator3-dev` and `libayatana-appindicator3-dev` on `ubuntu-latest`. For current Ubuntu runners, `libappindicator3-dev` is the risky package in that pair and is the most likely cause of `apt-get install` exiting with code `100`.
+
+## CI fix attempted
+
+The workflow was updated with these changes:
+
+- `actions/checkout@v4` -> `actions/checkout@v5`
+- `actions/setup-node@v4` -> `actions/setup-node@v5`
+- added `cache: npm`
+- changed `npm install` -> `npm ci`
+- added `DEBIAN_FRONTEND: noninteractive` to the Ubuntu dependency step
+- split the `apt-get install` step across lines for readability and maintenance
+- removed `libappindicator3-dev`
+- kept the Tauri-relevant Ubuntu packages that match current Linux prerequisite guidance:
+  - `libgtk-3-dev`
+  - `libwebkit2gtk-4.1-dev`
+  - `libayatana-appindicator3-dev`
+  - `librsvg2-dev`
+  - `patchelf`
+
+This is a real workflow fix attempt. It has not been verified by a completed GitHub Actions run inside this environment yet.
+
+## Commands run locally in this environment
+
+All commands below were run from the repo root.
+
+For Node-based commands in this Codex session, the Homebrew toolchain had to be exposed explicitly:
 
 ```bash
 export PATH="/opt/homebrew/bin:$PATH"
 ```
 
-### 5.1 `cargo test --workspace`
+### `cargo fmt --all --check`
 
 Result:
 
-- failed
-- exit code: `127`
-- observed output: `command not found: cargo`
+- failed immediately
+- exact failure: `zsh: command not found: cargo`
 
-Conclusion:
+### `cargo test --workspace`
 
-- Rust tooling is not available in this Codex session environment.
+Result:
 
-### 5.2 `npm install`
+- failed immediately
+- exact failure: `zsh: command not found: cargo`
+
+### `cargo clippy --workspace --all-targets -- -D warnings`
+
+Result:
+
+- failed immediately
+- exact failure: `zsh: command not found: cargo`
+
+### `npm install`
 
 Result:
 
 - succeeded
-- dependencies were installed locally for this repo
 
-Note:
+Exact output:
 
-- this required exporting `/opt/homebrew/bin` into `PATH` because the default session PATH did not expose the Homebrew Node toolchain.
+```text
+added 63 packages in 481ms
+```
 
-### 5.3 `npm run test`
+### `npm run lint`
 
 Result:
 
-- partially succeeded, then failed overall
-- the frontend test step passed
-- the root script failed afterwards because it chains into `cargo test --workspace`
+- failed overall
+- the frontend lint step completed first
+- the root script then failed because it calls Cargo
 
-Observed output summary:
+Exact failure:
 
-- `vitest`: passed (`1` file, `1` test)
-- `cargo`: not found
-- final exit code: `127`
+```text
+sh: cargo: command not found
+```
 
-Conclusion:
-
-- the frontend test path is working
-- the combined root test script still fails in this environment because Rust is missing
-
-### 5.4 `npm run build`
+### `npm run test`
 
 Result:
 
-- succeeded after the TypeScript config fixes in this pass
-- the adjusted build script did not leave tracked TypeScript/Vite artifacts behind
-- production frontend assets were generated under `apps/desktop/dist`
-- final exit code: `0`
+- frontend tests passed
+- the root script then failed when it reached the Rust workspace test step
 
-## 6. Commands not executed successfully
+Exact failure tail:
 
-These commands remain blocked in this environment for one reason only: Rust tooling is unavailable.
-
-- `cargo test --workspace`
-- any Tauri desktop build path that requires Cargo/Rust
-
-## 7. Current verification state
-
-What is verified here:
-
-- repo structure exists and matches the intended product shape
-- JSON manifests parse correctly
-- frontend dependencies install correctly when Homebrew Node is added to `PATH`
-- frontend unit tests pass
-- frontend production build passes
-- the public-facing README and report are now in better shape for disclosure
-
-What is not verified here:
-
-- Rust test suite execution
-- Tauri desktop binary build
-- end-to-end desktop runtime validation on a machine with both Node and Rust available in PATH by default
-
-## 8. Human verification commands
-
-### Frontend path
-
-```bash
-cd "/Volumes/ABacelarHD/Apps Codex/codex_control"
-export PATH="/opt/homebrew/bin:$PATH"
-npm install
-npm run test
-npm run build
+```text
+✓ src/lib/grouping.test.ts (1 test)
+Test Files  1 passed (1)
+Tests  1 passed (1)
+sh: cargo: command not found
 ```
 
-### Rust path
+### `npm run build`
 
-```bash
-cd "/Volumes/ABacelarHD/Apps Codex/codex_control"
-cargo test --workspace
+Result:
+
+- succeeded
+
+Exact output tail:
+
+```text
+vite v5.4.21 building for production...
+✓ 1636 modules transformed.
+✓ built in 683ms
 ```
 
-### Hook CLI spot checks
+## Technical adjustments retained in this pass
 
-```bash
-cd "/Volumes/ABacelarHD/Apps Codex/codex_control"
-cat packages/hook-cli/tests/fixtures/session_start.json | cargo run -p codex-control-hook -- ingest --emit-json-response
-cargo run -p codex-control-hook -- doctor
+These changes remain part of the repo because they fixed real local issues during this finish pass:
+
+- updated frontend TypeScript config to unblock Vite type resolution
+- fixed a nullable timeline load path in the desktop UI
+- replaced `replaceAll` in one UI component to avoid avoidable compatibility friction
+- changed the desktop build script so it does not emit tracked TypeScript and Vite artifacts
+- added `package-lock.json` for reproducible npm installs
+- updated `.gitignore` to keep generated build residue out of the repo
+
+## Remaining gaps
+
+- Local Rust/Node verification is required before release.
+- Local Node commands were exercised here, but full workspace verification still requires a machine with both Node and Rust available in the default PATH.
+- The updated GitHub Actions workflow still needs a fresh run to confirm the Ubuntu package fix.
+- No release artifact has been produced yet.
+- No real desktop screenshot has been added yet.
+
+## Hook contract status
+
+The hook contract was not changed in this pass.
+
+The following behaviors remain required:
+
+- `codex-control-hook ingest` exits `0` with empty stdout on success
+- `codex-control-hook ingest --emit-json-response` emits only:
+
+```json
+{"continue":true,"suppressOutput":false}
 ```
 
-## 9. Remaining gaps
+- `codex-control-hook policy` denies destructive `PreToolUse` with:
 
-- Rust is still unverified in this environment.
-- A real desktop screenshot should only be added after a verified Tauri build, not before.
-- The root `npm run test` script currently reflects the whole workspace honestly, so it will keep failing anywhere Rust is absent.
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "Destructive command blocked by Codex Control policy."
+  }
+}
+```
 
-## 10. Disclosure status
+- `codex-control-hook policy` denies destructive `PermissionRequest` with:
 
-Editorially, the repo is now fit for public review.
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PermissionRequest",
+    "decision": {
+      "behavior": "deny",
+      "message": "Blocked by Codex Control policy."
+    }
+  }
+}
+```
 
-Technically, the frontend path has been exercised for real in this environment. The remaining disclosure caveat is simple: Rust and Tauri still need to be verified on a machine where Cargo is available.
+## Release readiness
+
+Release readiness: not ready until CI passes and a real screenshot and build artifact exist.

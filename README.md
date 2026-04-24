@@ -1,34 +1,35 @@
 # Codex Control
 
-Codex Control is a local desktop dashboard for people who keep several Codex CLI sessions running at once and want one place to see what is actually happening.
+When you run more than one Codex CLI session, the terminal stops being enough.
 
-When you have Codex working across multiple repos, branches, and terminals, the problem is not starting another session. The problem is remembering which one is waiting for approval, which one just failed a shell command, which one is still active, and which workspace has drifted since the last prompt. Codex Control is built for that specific situation.
+Codex Control gives you a local desktop view of what each Codex session is doing: which repo it is in, what command it just ran, whether it is waiting for approval, what changed in Git, and where the transcript lives.
 
-## Screenshot
+It is not a cloud service, not a remote controller, and not an analytics layer. It reads local Codex hook events, enriches them with local process and Git state, and keeps the data on your machine.
 
-Screenshot coming after first verified desktop build.
+Screenshot coming after the first verified desktop build.
 
-## What it does
+## Why this exists
 
-Codex Control keeps a local record of Codex hook events, enriches that record with repository and process information, and presents the result as a desktop dashboard.
+When several Codex CLI sessions are open across different repos, it is hard to remember which one is editing code, which one is waiting for approval, and which one already changed files. Codex Control keeps that state visible without sending it anywhere.
 
-In practice, that means:
+This project exists for the gap between a single terminal window and a full orchestration product. If you run Codex in one repo at a time, you probably do not need it. If you keep several sessions alive while you work across branches and workspaces, this becomes useful quickly.
 
-- session cards grouped by repository
-- a timeline per session with prompts, shell activity, approval requests, and tool results
-- quick local actions such as opening the workspace, checking the transcript, and reviewing git state
-- local persistence with SQLite first and JSONL fallback if the database is unavailable
-- secret redaction before data is written to disk
+## What it shows
 
-The app is local-first. It does not depend on a server to be useful.
+- active and recent sessions grouped by repository
+- session status, model, current working directory, and transcript path
+- the last prompt, the last shell command, and the last assistant message when available
+- approval state for shell actions that require a decision
+- Git context: branch, changed files, staged count, unstaged count, and diff summary
+- a per-session timeline of prompts, hook events, shell actions, approvals, failures, and stops
 
-## Repository layout
+## What it does not do
 
-- `apps/desktop`: Tauri desktop app, React UI, and local commands
-- `packages/codex-core`: shared Rust domain logic for normalization, storage, redaction, repo context, and transcript parsing
-- `packages/hook-cli`: the `codex-control-hook` binary used by Codex hooks
-- `examples/hooks`: example `config.toml` and `hooks.json`
-- `docs`: architecture, install notes, hook contract, security, and troubleshooting
+- It does not send session data to a server.
+- It does not auto-approve Codex permission requests.
+- It does not promise complete shell enforcement.
+- It does not treat Windows hooks as production-ready.
+- It does not replace reviewing diffs before committing.
 
 ## Install from source
 
@@ -51,45 +52,80 @@ npm run tauri:dev
 
 ## Hook setup
 
-Install the hook binary locally:
+Install the local hook binary:
 
 ```bash
 cargo install --path packages/hook-cli
 ```
 
-Then copy these examples into the Codex configuration you actually use:
+Then copy these files into the Codex configuration you actually use:
 
 - `examples/hooks/config.toml`
 - `examples/hooks/hooks.json`
 
-The hook contract is documented in [docs/hooks.md](docs/hooks.md). The CLI behavior matters here: successful ingest writes nothing to stdout unless `--emit-json-response` is explicitly requested.
+The example config enables `codex_hooks`. The example hooks file wires Codex hook events into `codex-control-hook`.
+
+## Hook CLI contract
+
+The hook CLI reads a single JSON object from stdin and preserves unknown fields inside `payload` after normalization.
+
+- `codex-control-hook ingest`
+  - exits `0` on success
+  - writes nothing to stdout on success
+  - writes diagnostics to stderr only
+- `codex-control-hook ingest --emit-json-response`
+  - emits only:
+
+```json
+{"continue":true,"suppressOutput":false}
+```
+
+- `codex-control-hook policy`
+  - denies destructive `PreToolUse` and `PermissionRequest` events with Codex-compatible JSON output
+  - never auto-approves escalation
+
+The full contract and examples live in [docs/hooks.md](docs/hooks.md).
 
 ## Development
 
 ```bash
 npm install
+npm run lint
 npm run test
 npm run build
+cargo fmt --all --check
 cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
 npm run tauri:dev
 ```
 
 ## Security model
 
-Codex Control stores data locally and treats hooks as telemetry plus guardrails, not as a universal enforcement layer.
+Codex Control is local-first.
 
-- data stays on the local machine
-- destructive shell commands can be denied by policy output
-- approval requests are never auto-approved by default
-- transcript parsing is best-effort and does not mutate the source file
+- session data stays on disk on the local machine
+- hooks are treated as guardrails and telemetry, not as universal interception
+- destructive shell activity can be denied where the configured hooks see it
+- transcript parsing is best-effort and never mutates the source transcript
+- secret redaction runs before persistence
 
-More detail lives in [docs/security.md](docs/security.md).
+More detail is in [docs/security.md](docs/security.md).
 
-## Current limits
+## Current limitations
 
 - macOS and Linux are the intended targets
 - Windows hooks are not documented as production-ready
-- session resume is intentionally not exposed as a real action until there is a safe local handoff path
-- the current desktop UI uses polling instead of a push channel
+- the desktop UI currently uses polling instead of a push transport
+- session resume is intentionally not exposed as an action until there is a safe local handoff path
+- no verified desktop release artifact is published yet
 
-If you run Codex in one terminal, you probably do not need this. If you run Codex across several repos and lose track of state, this is the tool.
+## Roadmap
+
+- verify the Rust workspace and Tauri desktop build in CI
+- replace polling with a push update path once the local backend transport is stable
+- add a real desktop screenshot after the first verified build
+- tighten stale-session handling with better process correlation
+
+## License
+
+MIT. See [LICENSE](LICENSE).

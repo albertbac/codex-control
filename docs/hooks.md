@@ -4,7 +4,7 @@
 
 `codex-control-hook` reads exactly one JSON object from stdin.
 
-Common fields expected from Codex:
+Common fields expected from Codex are:
 
 - `session_id`
 - `transcript_path`
@@ -13,14 +13,15 @@ Common fields expected from Codex:
 - `model`
 - `turn_id` when the hook is turn-scoped
 
-Unknown fields are preserved in `payload`.
+Unknown fields are preserved under `payload`.
 
 ## stdout behavior
 
 ### `codex-control-hook ingest`
 
-- success: writes nothing to stdout
+- success: stdout stays empty
 - diagnostics: stderr only
+- exit code on success: `0`
 
 ### `codex-control-hook ingest --emit-json-response`
 
@@ -34,7 +35,7 @@ Success emits exactly:
 
 Safe commands:
 
-- exit 0
+- exit `0`
 - stdout empty
 
 Denied `PreToolUse` output:
@@ -73,7 +74,7 @@ Denied `PermissionRequest` output:
 - `Stop`
 - unknown events normalize to `Unknown`
 
-## Example tests with stdin piping
+## Example local checks
 
 ```bash
 cat packages/hook-cli/tests/fixtures/session_start.json | cargo run -p codex-control-hook -- ingest

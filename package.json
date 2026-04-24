@@ -2,7 +2,7 @@
   "name": "codex-control",
   "private": true,
   "version": "0.1.0",
-  "description": "A local desktop dashboard for monitoring and managing multiple Codex CLI sessions in real time.",
+  "description": "Local desktop visibility for Codex CLI sessions, hook events, approvals, and Git changes.",
   "workspaces": [
     "apps/desktop"
   ],

@@ -2,29 +2,31 @@
 
 ## Overview
 
-Codex Control has four local-only layers:
+Codex Control has four local layers:
 
 1. `codex-control-hook` reads hook JSON from stdin, normalizes it, redacts likely secrets, and persists it.
-2. `codex-core` owns domain models, event normalization, status reduction, storage, transcript parsing helpers, repository context lookup, and policy rules.
+2. `codex-core` owns the shared domain model, event normalization, status reduction, storage, transcript parsing helpers, Git inspection helpers, and policy rules.
 3. The Tauri desktop backend reads the local store, enriches sessions with process and Git information, and exposes commands to the React UI.
-4. The React UI polls dashboard and timeline commands to present live state grouped by repository.
+4. The React UI polls for dashboard and timeline snapshots and renders the current local state.
 
 ## Hook ingestion
 
 ```mermaid
 flowchart LR
-  A[Codex hook JSON on stdin] --> B[codex-control-hook ingest]
-  B --> C[Normalize event]
-  C --> D[Redact likely secrets]
-  D --> E[Persist to SQLite]
-  E --> F[Fallback to JSONL spool if SQLite is unavailable]
+  A["Codex hook JSON on stdin"] --> B["codex-control-hook ingest"]
+  B --> C["Normalize event"]
+  C --> D["Redact likely secrets"]
+  D --> E["Persist to SQLite"]
+  E --> F["Fallback to JSONL spool if SQLite is unavailable"]
 ```
 
 ## Process discovery
 
-`process_watcher.rs` scans local processes for Codex CLI commands. Process data is enrichment only. The authoritative session timeline comes from hook events.
+`process_watcher.rs` scans local processes for Codex CLI commands.
 
-Collected fields:
+Process discovery is enrichment only. The authoritative session history comes from hook events.
+
+Collected fields include:
 
 - pid
 - cwd
@@ -36,11 +38,11 @@ Collected fields:
 
 Storage is local only.
 
-- Primary: SQLite
-- Fallback: JSONL spool file
-- Schema migrations: versioned in code through `schema_migrations`
+- Primary store: SQLite
+- Fallback store: JSONL spool
+- Schema tracking: `schema_migrations`
 
-Tables:
+Current tables:
 
 - `events`
 - `sessions`
@@ -48,7 +50,7 @@ Tables:
 
 ## Live update flow
 
-The first release uses polling instead of push transport.
+The current desktop build uses polling rather than a push channel.
 
 ```mermaid
 sequenceDiagram
@@ -59,13 +61,13 @@ sequenceDiagram
   Hook->>Store: Persist event
   UI->>Desktop: dashboard_snapshot()
   Desktop->>Store: Read sessions and events
-  Desktop->>Desktop: Enrich with process + Git + transcript info
+  Desktop->>Desktop: Enrich with process, Git, and transcript info
   Desktop-->>UI: Dashboard snapshot JSON
 ```
 
 ## Status reducer
 
-Status changes are driven by hook events:
+Session status is reduced from hook events.
 
 - `SessionStart` => `idle`
 - `UserPromptSubmit` => `working`
@@ -87,11 +89,13 @@ Status changes are driven by hook events:
 - unstaged count
 - diff stat summary
 
-Failures in Git inspection never block the dashboard.
+Git inspection failures should never block the dashboard.
 
 ## Transcript handling
 
-`transcript_parser.rs` uses best-effort parsing.
+`transcript_parser.rs` is best-effort by design.
+
+It:
 
 - tolerates missing files
 - tolerates malformed lines
