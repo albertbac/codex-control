@@ -8,9 +8,9 @@ Codex command hooks receive one JSON object on `stdin`. Codex treats exit code `
 
 ### ingest
 
-~~~bash
+```bash
 codex-control-hook ingest
-~~~
+```
 
 Behavior:
 
@@ -25,21 +25,21 @@ Behavior:
 
 ### ingest with JSON response
 
-~~~bash
+```bash
 codex-control-hook ingest --emit-json-response
-~~~
+```
 
 On success, this emits only:
 
-~~~json
+```json
 {"continue":true,"suppressOutput":false}
-~~~
+```
 
 ### policy
 
-~~~bash
+```bash
 codex-control-hook policy
-~~~
+```
 
 Behavior:
 
@@ -51,7 +51,7 @@ Behavior:
 
 For a denied `PreToolUse` event, the output shape is:
 
-~~~json
+```json
 {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
@@ -59,11 +59,11 @@ For a denied `PreToolUse` event, the output shape is:
     "permissionDecisionReason": "Destructive command blocked by Codex Control policy."
   }
 }
-~~~
+```
 
 For a denied `PermissionRequest` event, the output shape is:
 
-~~~json
+```json
 {
   "hookSpecificOutput": {
     "hookEventName": "PermissionRequest",
@@ -73,7 +73,7 @@ For a denied `PermissionRequest` event, the output shape is:
     }
   }
 }
-~~~
+```
 
 `PermissionRequest` output must not include `updatedInput`, `updatedPermissions`, or `interrupt`.
 
@@ -117,20 +117,20 @@ The examples use `codex-control-hook ingest` for event capture and `codex-contro
 
 Use sanitized fixtures when testing locally.
 
-~~~bash
+```bash
 printf '%s\n' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"SessionStart","model":"example-model","source":"startup"}' | codex-control-hook ingest
-~~~
+```
 
 The command should exit `0` and print nothing to `stdout`.
 
 For JSON response mode:
 
-~~~bash
+```bash
 printf '%s\n' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"Stop","model":"example-model"}' | codex-control-hook ingest --emit-json-response
-~~~
+```
 
 Expected output:
 
-~~~json
+```json
 {"continue":true,"suppressOutput":false}
-~~~
+```
