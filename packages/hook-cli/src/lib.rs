@@ -6,6 +6,7 @@ use codex_core::{
   permission_request_deny_response,
   pre_tool_use_deny_response,
   redact_event_payload,
+  sanitize_public_output,
   LocalStore,
   PolicyVerdict,
 };
@@ -30,7 +31,7 @@ pub fn run_ingest(input: &str, emit_json_response: bool) -> CommandOutput {
     },
     Err(error) => CommandOutput {
       stdout: String::new(),
-      stderr: format!("{error:#}"),
+      stderr: sanitize_public_output(&format!("{error:#}")),
       exit_code: 1,
     },
   }
@@ -45,7 +46,7 @@ pub fn run_policy(input: &str) -> CommandOutput {
     },
     Err(error) => CommandOutput {
       stdout: String::new(),
-      stderr: format!("{error:#}"),
+      stderr: sanitize_public_output(&format!("{error:#}")),
       exit_code: 1,
     },
   }
@@ -60,7 +61,7 @@ pub fn run_doctor() -> CommandOutput {
     },
     Err(error) => CommandOutput {
       stdout: String::new(),
-      stderr: format!("{error:#}"),
+      stderr: sanitize_public_output(&format!("{error:#}")),
       exit_code: 1,
     },
   }
@@ -97,10 +98,8 @@ fn doctor_impl() -> Result<String> {
     serde_json::from_str(EXAMPLE_HOOKS).context("embedded hooks.json is invalid")?;
 
   Ok(format!(
-    "Codex Control hook doctor\n- store mode: {}\n- database path: {}\n- spool path: {}\n- embedded examples: valid\n- latest event: {}\n",
+    "Codex Control hook doctor\n- store mode: {}\n- database file: codex-control.db\n- spool file: events.jsonl\n- embedded examples: valid\n- latest event: {}\n",
     store.mode().as_str(),
-    store.paths().database_path,
-    store.paths().spool_path,
     store.latest_event_at()?.unwrap_or_else(|| "none".to_string())
   ))
 }

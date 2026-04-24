@@ -6,7 +6,7 @@ Codex Control has four local layers:
 
 1. `codex-control-hook` reads hook JSON from stdin, normalizes it, redacts likely secrets, and persists it.
 2. `codex-core` owns the shared domain model, event normalization, status reduction, storage, transcript parsing helpers, Git inspection helpers, and policy rules.
-3. The Tauri desktop backend reads the local store, enriches sessions with process and Git information, and exposes commands to the React UI.
+3. The Tauri desktop runtime reads the local store, enriches sessions with process and Git information, and exposes commands to the React UI.
 4. The React UI polls for dashboard and timeline snapshots and renders the current local state.
 
 ## Hook ingestion
@@ -56,7 +56,7 @@ The current desktop build uses polling rather than a push channel.
 sequenceDiagram
   participant Hook as codex-control-hook
   participant Store as Local store
-  participant Desktop as Tauri backend
+  participant Desktop as Tauri runtime
   participant UI as React UI
   Hook->>Store: Persist event
   UI->>Desktop: dashboard_snapshot()

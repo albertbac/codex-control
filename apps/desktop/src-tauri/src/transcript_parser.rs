@@ -11,7 +11,7 @@ pub fn read_transcript_summary(path: Option<&str>) -> Option<TranscriptSummary> 
 }
 
 pub fn inspect_transcript(path: &str) -> Result<String> {
-  let content = fs::read_to_string(path).with_context(|| format!("unable to read transcript at {path}"))?;
+  let content = fs::read_to_string(path).context("unable to read transcript")?;
   let preview = content.lines().take(160).collect::<Vec<_>>().join("\n");
   Ok(sanitize_preview(&preview))
 }

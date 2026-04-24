@@ -6,7 +6,9 @@ Codex Control gives you a local desktop view of what each Codex session is doing
 
 It is not a cloud service, not a remote controller, and not an analytics layer. It reads local Codex hook events, enriches them with local process and Git state, and keeps the data on your machine.
 
-Screenshot coming after the first verified desktop build.
+## Screenshots
+
+No screenshot is published yet. I will add one after the first verified desktop build, not before.
 
 ## Why this exists
 

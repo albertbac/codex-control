@@ -25,7 +25,7 @@ export function App() {
   const [inspectResult, setInspectResult] = useState<string | null>(null);
   const [settings, setSettings] = useState<SettingsInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [usingMock, setUsingMock] = useState(false);
+  const [usingFallback, setUsingFallback] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const selectedSession = useMemo(
@@ -41,7 +41,7 @@ export function App() {
         const [dashboard, settingsResult] = await Promise.all([loadDashboard(), loadSettings()]);
         if (cancelled) return;
         setSessions(dashboard.sessions);
-        setUsingMock(dashboard.usingMock || settingsResult.usingMock);
+        setUsingFallback(dashboard.usingFallback || settingsResult.usingFallback);
         setSettings(settingsResult.settings);
         setError(null);
         if (!selectedSessionId && dashboard.sessions.length > 0) {
@@ -129,14 +129,14 @@ export function App() {
       <header className="topbar">
         <div>
           <p className="eyebrow">Codex Control</p>
-          <h1>Live Codex CLI command center</h1>
+          <h1>Track local Codex sessions in one place</h1>
           <p className="subtitle">
-            Local-first monitoring for active Codex sessions, hook events, Git drift, and approval pressure.
+            See current session state, recent commands, approvals, transcript references, and Git drift without leaving the machine.
           </p>
         </div>
         <div className="topbar-actions">
-          <span className={`status-dot ${usingMock ? 'warn' : 'ok'}`}>
-            {usingMock ? 'Fallback data' : 'Live local state'}
+          <span className={`status-dot ${usingFallback ? 'warn' : 'ok'}`}>
+            {usingFallback ? 'Fallback state' : 'Live local state'}
           </span>
           <button type="button" className="secondary-button" onClick={() => window.location.reload()}>
             <RefreshCw size={16} /> Refresh
@@ -147,9 +147,9 @@ export function App() {
       {error ? (
         <section className="banner banner-error">{error}</section>
       ) : null}
-      {usingMock ? (
+      {usingFallback ? (
         <section className="banner banner-warn">
-          <ShieldCheck size={16} /> Mock data is being shown as a development fallback. It is not real session state.
+          <ShieldCheck size={16} /> Fallback sample data is visible because the local desktop runtime is unavailable.
         </section>
       ) : null}
 
@@ -164,7 +164,7 @@ export function App() {
           </div>
 
           {isLoading ? (
-            <EmptyState title="Loading local state" body="Reading the local store, process table, and repository metadata." />
+            <EmptyState title="Loading local state" body="Reading local session history, process state, and repository metadata." />
           ) : groups.length === 0 ? (
             <EmptyState
               title="No sessions found"
@@ -196,7 +196,7 @@ export function App() {
         </section>
 
         <TimelinePanel session={selectedSession} timeline={timeline} inspectResult={inspectResult} />
-        {settings ? <SettingsPanel settings={settings} usingMock={usingMock} /> : null}
+        {settings ? <SettingsPanel settings={settings} usingFallback={usingFallback} /> : null}
       </section>
     </main>
   );

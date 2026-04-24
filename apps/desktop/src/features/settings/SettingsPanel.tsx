@@ -3,10 +3,10 @@ import { formatTimestamp } from '../../lib/time';
 
 export function SettingsPanel({
   settings,
-  usingMock,
+  usingFallback,
 }: {
   settings: SettingsInfo;
-  usingMock: boolean;
+  usingFallback: boolean;
 }) {
   return (
     <section className="panel settings-panel">
@@ -58,7 +58,7 @@ export function SettingsPanel({
           {settings.notes.map((note) => (
             <li key={note}>{note}</li>
           ))}
-          {usingMock ? <li>Mock state is active. Real hooks have not been observed by the desktop backend.</li> : null}
+          {usingFallback ? <li>Fallback sample data is active. No live hook events have been observed in this runtime.</li> : null}
         </ul>
       </div>
     </section>

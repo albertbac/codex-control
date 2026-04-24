@@ -1,22 +1,23 @@
 use std::path::Path;
 use std::process::Command;
 
+use crate::redaction::sanitize_runtime_message;
 use crate::session_store::{dashboard_snapshot as build_dashboard, git_diff_preview, session_timeline as build_timeline, settings_info as build_settings};
 use crate::transcript_parser::inspect_transcript as inspect_transcript_file;
 
 #[tauri::command]
 pub fn dashboard_snapshot() -> Result<Vec<codex_core::DashboardSession>, String> {
-  build_dashboard().map_err(|error| error.to_string())
+  build_dashboard().map_err(|error| sanitize_runtime_message(&error.to_string()))
 }
 
 #[tauri::command]
 pub fn session_timeline(session_id: String) -> Result<Vec<codex_core::TimelineItem>, String> {
-  build_timeline(&session_id).map_err(|error| error.to_string())
+  build_timeline(&session_id).map_err(|error| sanitize_runtime_message(&error.to_string()))
 }
 
 #[tauri::command]
 pub fn settings_info() -> Result<codex_core::SettingsInfo, String> {
-  build_settings().map_err(|error| error.to_string())
+  build_settings().map_err(|error| sanitize_runtime_message(&error.to_string()))
 }
 
 #[tauri::command]
@@ -40,7 +41,7 @@ pub fn open_terminal(cwd: String) -> Result<(), String> {
     Command::new("open")
       .args(["-a", "Terminal", &cwd])
       .status()
-      .map_err(|error| error.to_string())?;
+      .map_err(|error| sanitize_runtime_message(&error.to_string()))?;
     return Ok(());
   }
 
@@ -82,7 +83,7 @@ pub fn open_editor(cwd: String) -> Result<(), String> {
     Command::new("open")
       .args(["-a", "Visual Studio Code", &cwd])
       .status()
-      .map_err(|error| error.to_string())?;
+      .map_err(|error| sanitize_runtime_message(&error.to_string()))?;
     return Ok(());
   }
 
@@ -91,7 +92,7 @@ pub fn open_editor(cwd: String) -> Result<(), String> {
     Command::new("xdg-open")
       .arg(&cwd)
       .status()
-      .map_err(|error| error.to_string())?;
+      .map_err(|error| sanitize_runtime_message(&error.to_string()))?;
     return Ok(());
   }
 
@@ -107,6 +108,6 @@ pub fn terminate_process(pid: i64, confirm: bool) -> Result<(), String> {
   Command::new("kill")
     .args(["-TERM", &pid.to_string()])
     .status()
-    .map_err(|error| error.to_string())?;
+    .map_err(|error| sanitize_runtime_message(&error.to_string()))?;
   Ok(())
 }

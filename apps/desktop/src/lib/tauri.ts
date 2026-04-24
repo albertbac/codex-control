@@ -1,4 +1,4 @@
-import { mockSessions, mockSettings, mockTimeline } from './mockData';
+import { fallbackSessions, fallbackSettings, fallbackTimeline } from './fallbackData';
 import type { DashboardSession, SettingsInfo, TimelineItem } from '../features/sessions/types';
 
 async function tauriInvoke<T>(command: string, args?: Record<string, unknown>): Promise<T> {
@@ -10,12 +10,12 @@ async function tauriInvoke<T>(command: string, args?: Record<string, unknown>): 
   return invoke<T>(command, args);
 }
 
-export async function loadDashboard(): Promise<{ sessions: DashboardSession[]; usingMock: boolean }> {
+export async function loadDashboard(): Promise<{ sessions: DashboardSession[]; usingFallback: boolean }> {
   try {
     const sessions = await tauriInvoke<DashboardSession[]>('dashboard_snapshot');
-    return { sessions, usingMock: false };
+    return { sessions, usingFallback: false };
   } catch {
-    return { sessions: mockSessions, usingMock: true };
+    return { sessions: fallbackSessions, usingFallback: true };
   }
 }
 
@@ -23,16 +23,16 @@ export async function loadTimeline(sessionId: string): Promise<TimelineItem[]> {
   try {
     return await tauriInvoke<TimelineItem[]>('session_timeline', { sessionId });
   } catch {
-    return mockTimeline.filter((item) => item.sessionId === sessionId);
+    return fallbackTimeline.filter((item) => item.sessionId === sessionId);
   }
 }
 
-export async function loadSettings(): Promise<{ settings: SettingsInfo; usingMock: boolean }> {
+export async function loadSettings(): Promise<{ settings: SettingsInfo; usingFallback: boolean }> {
   try {
     const settings = await tauriInvoke<SettingsInfo>('settings_info');
-    return { settings, usingMock: false };
+    return { settings, usingFallback: false };
   } catch {
-    return { settings: mockSettings, usingMock: true };
+    return { settings: fallbackSettings, usingFallback: true };
   }
 }
 

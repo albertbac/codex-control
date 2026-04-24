@@ -6,6 +6,7 @@ use serde_json::Value;
 use crate::git_inspector::{inspect_diff_preview, inspect_git};
 use crate::hook_server::hook_runtime_state;
 use crate::process_watcher::collect_codex_processes;
+use crate::redaction::sanitize_preview;
 use crate::transcript_parser::read_transcript_summary;
 
 pub fn dashboard_snapshot() -> anyhow::Result<Vec<DashboardSession>> {
@@ -135,6 +136,7 @@ fn extract_result_summary(payload: &Value) -> Option<String> {
   payload
     .get("tool_response")
     .map(Value::to_string)
+    .map(|value| sanitize_preview(&value))
     .filter(|value| !value.is_empty())
 }
 

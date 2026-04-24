@@ -27,6 +27,7 @@ pub use policy::{
   pre_tool_use_deny_response,
   PolicyVerdict,
 };
+pub use redaction::{redact_text, redact_value, sanitize_public_output};
 pub use repo::{discover_repo_context, RepoContext};
 pub use store::{reconcile_stale_status, LocalStore, StoreMode, StoreWriteOutcome};
 pub use transcript::{parse_transcript, TranscriptSummary};
