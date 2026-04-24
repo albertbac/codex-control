@@ -202,9 +202,9 @@ Local visibility for Codex CLI sessions, approvals, hook events, and Git changes
 
 ## CI Status
 
-The last remote CI run inspected before this commit failed on Rust formatting.
+GitHub Actions passed on commit `773fb2c`.
 
-Local verification on this commit now passes:
+Remote CI verified:
 
 - Rust format
 - Rust tests
@@ -214,14 +214,11 @@ Local verification on this commit now passes:
 - frontend build
 - Tauri desktop build
 
-A fresh GitHub Actions run is still required after pushing this commit.
-
 ## Remaining Gaps
 
 - No real desktop screenshot is published yet.
 - No GitHub release artifact is published yet.
-- Current-commit CI must complete successfully after push before public release is called verified.
 
 ## Release Readiness
 
-Release readiness: source release candidate locally, pending current-commit CI, a real desktop screenshot, and a public release artifact.
+Release readiness: source release candidate. Public release is still pending a real desktop screenshot and a published release artifact.
