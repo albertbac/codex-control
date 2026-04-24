@@ -13,7 +13,10 @@
     }
   },
   "files": {
-    "includes": [
+    "include": [
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "vite.config.ts",
       "apps/desktop/src/**/*.ts",
       "apps/desktop/src/**/*.tsx",
       "apps/desktop/vite.config.ts"

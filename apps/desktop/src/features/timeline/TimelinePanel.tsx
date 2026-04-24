@@ -1,5 +1,5 @@
-import type { DashboardSession, TimelineItem } from '../sessions/types';
-import { formatTimestamp } from '../../lib/time';
+import type { DashboardSession, TimelineItem } from "../sessions/types";
+import { formatTimestamp } from "../../lib/time";
 
 export function TimelinePanel({
   session,
@@ -15,7 +15,7 @@ export function TimelinePanel({
       <div className="panel-header">
         <div>
           <p className="eyebrow">Timeline</p>
-          <h2>{session ? session.id : 'Select a session'}</h2>
+          <h2>{session ? session.id : "Select a session"}</h2>
         </div>
       </div>
 
@@ -23,15 +23,20 @@ export function TimelinePanel({
         <div className="empty-state compact">
           <div>
             <h3>No session selected</h3>
-            <p>Choose a session card to inspect prompts, commands, approvals, results, and transcript references.</p>
+            <p>
+              Choose a session card to inspect prompts, commands, approvals, results, and transcript
+              references.
+            </p>
           </div>
         </div>
       ) : (
         <>
           <div className="timeline-meta">
-            <span className="meta-chip">{session.repoName ?? 'Detached workspace'}</span>
-            <span className="meta-chip">{session.branch ?? 'No branch'}</span>
-            <span className="meta-chip">{session.process?.pid ? `pid ${session.process.pid}` : 'no pid'}</span>
+            <span className="meta-chip">{session.repoName ?? "Detached workspace"}</span>
+            <span className="meta-chip">{session.branch ?? "No branch"}</span>
+            <span className="meta-chip">
+              {session.process?.pid ? `pid ${session.process.pid}` : "no pid"}
+            </span>
           </div>
 
           <div className="timeline-scroll">
@@ -52,7 +57,9 @@ export function TimelinePanel({
                   {item.command ? <p className="mono">{item.command}</p> : null}
                   {item.approvalRequest ? <p>{item.approvalRequest}</p> : null}
                   {item.resultSummary ? <p>{item.resultSummary}</p> : null}
-                  {item.transcriptPath ? <p className="mono truncate">{item.transcriptPath}</p> : null}
+                  {item.transcriptPath ? (
+                    <p className="mono truncate">{item.transcriptPath}</p>
+                  ) : null}
                   {item.gitState ? <p>{item.gitState}</p> : null}
                 </article>
               ))
@@ -61,7 +68,10 @@ export function TimelinePanel({
 
           <div className="inspect-pane">
             <p className="label">Inspect output</p>
-            <pre>{inspectResult ?? 'Run an inspect action from a session card to preview transcript or Git diff output here.'}</pre>
+            <pre>
+              {inspectResult ??
+                "Run an inspect action from a session card to preview transcript or Git diff output here."}
+            </pre>
           </div>
         </>
       )}

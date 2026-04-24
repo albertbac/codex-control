@@ -1,10 +1,10 @@
 export type SessionStatus =
-  | 'working'
-  | 'idle'
-  | 'waiting_approval'
-  | 'errored'
-  | 'finished'
-  | 'unknown';
+  | "working"
+  | "idle"
+  | "waiting_approval"
+  | "errored"
+  | "finished"
+  | "unknown";
 
 export interface CodexSession {
   id: string;
@@ -57,13 +57,13 @@ export interface TimelineItem {
   id: string;
   sessionId: string;
   eventName:
-    | 'SessionStart'
-    | 'UserPromptSubmit'
-    | 'PreToolUse'
-    | 'PermissionRequest'
-    | 'PostToolUse'
-    | 'Stop'
-    | 'Unknown';
+    | "SessionStart"
+    | "UserPromptSubmit"
+    | "PreToolUse"
+    | "PermissionRequest"
+    | "PostToolUse"
+    | "Stop"
+    | "Unknown";
   createdAt: string;
   command: string | null;
   approvalRequest: string | null;

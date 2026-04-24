@@ -1,5 +1,5 @@
 export function formatRelativeTime(value: string | null): string {
-  if (!value) return 'Unknown';
+  if (!value) return "Unknown";
   const target = new Date(value).getTime();
   if (Number.isNaN(target)) return value;
   const deltaMs = Date.now() - target;
@@ -14,11 +14,11 @@ export function formatRelativeTime(value: string | null): string {
 }
 
 export function formatTimestamp(value: string | null): string {
-  if (!value) return 'Unavailable';
+  if (!value) return "Unavailable";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
   }).format(date);
 }

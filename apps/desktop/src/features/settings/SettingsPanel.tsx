@@ -1,5 +1,5 @@
-import type { SettingsInfo } from '../sessions/types';
-import { formatTimestamp } from '../../lib/time';
+import type { SettingsInfo } from "../sessions/types";
+import { formatTimestamp } from "../../lib/time";
 
 export function SettingsPanel({
   settings,
@@ -15,8 +15,8 @@ export function SettingsPanel({
           <p className="eyebrow">Settings</p>
           <h2>Local runtime</h2>
         </div>
-        <span className={`status-dot ${settings.hookCliAvailable ? 'ok' : 'warn'}`}>
-          {settings.hookCliAvailable ? 'Hook CLI found' : 'Hook CLI missing'}
+        <span className={`status-dot ${settings.hookCliAvailable ? "ok" : "warn"}`}>
+          {settings.hookCliAvailable ? "Hook CLI found" : "Hook CLI missing"}
         </span>
       </div>
 
@@ -43,7 +43,7 @@ export function SettingsPanel({
         </div>
         <div>
           <p className="label">Hook CLI path</p>
-          <p className="mono truncate">{settings.hookCliPath ?? 'Unavailable'}</p>
+          <p className="mono truncate">{settings.hookCliPath ?? "Unavailable"}</p>
         </div>
       </div>
 
@@ -58,7 +58,12 @@ export function SettingsPanel({
           {settings.notes.map((note) => (
             <li key={note}>{note}</li>
           ))}
-          {usingFallback ? <li>Fallback sample data is active. No live hook events have been observed in this runtime.</li> : null}
+          {usingFallback ? (
+            <li>
+              Fallback sample data is active. No live hook events have been observed in this
+              runtime.
+            </li>
+          ) : null}
         </ul>
       </div>
     </section>

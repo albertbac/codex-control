@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { RefreshCw, ShieldCheck } from 'lucide-react';
-import { EmptyState } from '../components/EmptyState';
-import { SessionCard, type SessionCardActions } from '../components/SessionCard';
-import { groupSessionsByRepo } from '../lib/grouping';
+import { useEffect, useMemo, useState } from "react";
+import { RefreshCw, ShieldCheck } from "lucide-react";
+import { EmptyState } from "../components/EmptyState";
+import { SessionCard, type SessionCardActions } from "../components/SessionCard";
+import { groupSessionsByRepo } from "../lib/grouping";
 import {
   copyToClipboard,
   inspectGitDiff,
@@ -13,10 +13,10 @@ import {
   openEditor,
   openTerminal,
   terminateProcess,
-} from '../lib/tauri';
-import type { DashboardSession, SettingsInfo, TimelineItem } from '../features/sessions/types';
-import { TimelinePanel } from '../features/timeline/TimelinePanel';
-import { SettingsPanel } from '../features/settings/SettingsPanel';
+} from "../lib/tauri";
+import type { DashboardSession, SettingsInfo, TimelineItem } from "../features/sessions/types";
+import { TimelinePanel } from "../features/timeline/TimelinePanel";
+import { SettingsPanel } from "../features/settings/SettingsPanel";
 
 export function App() {
   const [sessions, setSessions] = useState<DashboardSession[]>([]);
@@ -49,7 +49,7 @@ export function App() {
         }
       } catch (cause) {
         if (cancelled) return;
-        setError(cause instanceof Error ? cause.message : 'Unexpected dashboard error');
+        setError(cause instanceof Error ? cause.message : "Unexpected dashboard error");
       } finally {
         if (!cancelled) {
           setIsLoading(false);
@@ -82,7 +82,7 @@ export function App() {
         }
       } catch (cause) {
         if (!cancelled) {
-          setError(cause instanceof Error ? cause.message : 'Unexpected timeline error');
+          setError(cause instanceof Error ? cause.message : "Unexpected timeline error");
         }
       }
     }
@@ -106,9 +106,7 @@ export function App() {
         .catch(handleActionError);
     },
     onInspectDiff: (session) => {
-      void inspectGitDiff(session.cwd)
-        .then(setInspectResult)
-        .catch(handleActionError);
+      void inspectGitDiff(session.cwd).then(setInspectResult).catch(handleActionError);
     },
     onTerminate: (session) => {
       if (!session.process?.pid) return;
@@ -121,7 +119,7 @@ export function App() {
   };
 
   function handleActionError(cause: unknown) {
-    setError(cause instanceof Error ? cause.message : 'Unexpected action failure');
+    setError(cause instanceof Error ? cause.message : "Unexpected action failure");
   }
 
   return (
@@ -131,25 +129,29 @@ export function App() {
           <p className="eyebrow">Codex Control</p>
           <h1>Track local Codex sessions in one place</h1>
           <p className="subtitle">
-            See current session state, recent commands, approvals, transcript references, and Git drift without leaving the machine.
+            See current session state, recent commands, approvals, transcript references, and Git
+            drift without leaving the machine.
           </p>
         </div>
         <div className="topbar-actions">
-          <span className={`status-dot ${usingFallback ? 'warn' : 'ok'}`}>
-            {usingFallback ? 'Fallback state' : 'Live local state'}
+          <span className={`status-dot ${usingFallback ? "warn" : "ok"}`}>
+            {usingFallback ? "Fallback state" : "Live local state"}
           </span>
-          <button type="button" className="secondary-button" onClick={() => window.location.reload()}>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => window.location.reload()}
+          >
             <RefreshCw size={16} /> Refresh
           </button>
         </div>
       </header>
 
-      {error ? (
-        <section className="banner banner-error">{error}</section>
-      ) : null}
+      {error ? <section className="banner banner-error">{error}</section> : null}
       {usingFallback ? (
         <section className="banner banner-warn">
-          <ShieldCheck size={16} /> Fallback sample data is visible because the local desktop runtime is unavailable.
+          <ShieldCheck size={16} /> Fallback sample data is visible because the local desktop
+          runtime is unavailable.
         </section>
       ) : null}
 
@@ -164,7 +166,10 @@ export function App() {
           </div>
 
           {isLoading ? (
-            <EmptyState title="Loading local state" body="Reading local session history, process state, and repository metadata." />
+            <EmptyState
+              title="Loading local state"
+              body="Reading local session history, process state, and repository metadata."
+            />
           ) : groups.length === 0 ? (
             <EmptyState
               title="No sessions found"
@@ -195,7 +200,11 @@ export function App() {
           )}
         </section>
 
-        <TimelinePanel session={selectedSession} timeline={timeline} inspectResult={inspectResult} />
+        <TimelinePanel
+          session={selectedSession}
+          timeline={timeline}
+          inspectResult={inspectResult}
+        />
         {settings ? <SettingsPanel settings={settings} usingFallback={usingFallback} /> : null}
       </section>
     </main>
