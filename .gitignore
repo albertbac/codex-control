@@ -12,3 +12,6 @@ apps/desktop/node_modules/
 coverage/
 .vscode/
 .idea/
+*.tsbuildinfo
+apps/desktop/vite.config.js
+apps/desktop/vite.config.d.ts

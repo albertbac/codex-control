@@ -74,7 +74,9 @@ export function App() {
 
     async function refreshTimeline() {
       try {
-        const items = await loadTimeline(selectedSessionId);
+        const sessionId = selectedSessionId;
+        if (!sessionId) return;
+        const items = await loadTimeline(sessionId);
         if (!cancelled) {
           setTimeline(items);
         }

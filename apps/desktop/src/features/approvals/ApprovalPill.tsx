@@ -7,5 +7,5 @@ export function ApprovalPill({
     return <span className="meta-chip">No pending approvals</span>;
   }
 
-  return <span className={`meta-chip approval-${value}`}>{value.replaceAll('_', ' ')}</span>;
+  return <span className={`meta-chip approval-${value}`}>{value.split('_').join(' ')}</span>;
 }
