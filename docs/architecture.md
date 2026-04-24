@@ -22,16 +22,7 @@ Unknown fields are preserved inside the event payload. Unknown event names are s
 
 ## Session store
 
-The session store keeps:
-
-* normalized events
-* session status
-* current working directory
-* repository metadata
-* timestamps
-* last prompt
-* last command
-* last assistant message when available
+The session store keeps normalized events, session status, workspace metadata, timestamps, last prompt, last command, and last assistant message when available.
 
 SQLite is the preferred storage path. A JSONL spool is used when the database is not available.
 
@@ -45,14 +36,7 @@ Hooks are the primary event source. Process discovery helps identify active loca
 
 Git inspection is local and best-effort.
 
-The app collects:
-
-* repository root
-* branch name
-* changed file count
-* staged count
-* unstaged count
-* diff summary
+The app collects repository root, branch name, changed file count, staged count, unstaged count, and diff summary.
 
 Git inspection does not modify the repository.
 
