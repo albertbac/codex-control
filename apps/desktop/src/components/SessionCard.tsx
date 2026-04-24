@@ -1,4 +1,5 @@
-import { Copy, FileSearch, FolderSearch, GitBranch, PlayCircle, Skull, SquareTerminal } from 'lucide-react';
+import type { KeyboardEvent } from 'react';
+import { Ban, Copy, FileSearch, FolderSearch, GitBranch, GitCompare, SquareTerminal } from 'lucide-react';
 import type { DashboardSession } from '../features/sessions/types';
 import { ApprovalPill } from '../features/approvals/ApprovalPill';
 import { GitSummary } from '../features/git/GitSummary';
@@ -25,8 +26,21 @@ export function SessionCard({
   onSelect(): void;
   actions: SessionCardActions;
 }) {
+  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelect();
+    }
+  }
+
   return (
-    <button type="button" className={`session-card ${selected ? 'selected' : ''}`} onClick={onSelect}>
+    <article
+      className={`session-card ${selected ? 'selected' : ''}`}
+      role="button"
+      tabIndex={0}
+      onClick={onSelect}
+      onKeyDown={handleKeyDown}
+    >
       <div className="session-card-header">
         <div>
           <div className="session-card-title-row">
@@ -63,8 +77,8 @@ export function SessionCard({
           <button type="button" className="icon-button" onClick={(event) => { event.stopPropagation(); actions.onOpenEditor(session); }}><FolderSearch size={16} /></button>
           <button type="button" className="icon-button" onClick={(event) => { event.stopPropagation(); actions.onCopySession(session); }}><Copy size={16} /></button>
           <button type="button" className="icon-button" onClick={(event) => { event.stopPropagation(); actions.onInspectTranscript(session); }} disabled={!session.transcriptPath}><FileSearch size={16} /></button>
-          <button type="button" className="icon-button" onClick={(event) => { event.stopPropagation(); actions.onInspectDiff(session); }}><PlayCircle size={16} /></button>
-          <button type="button" className="icon-button danger" onClick={(event) => { event.stopPropagation(); actions.onTerminate(session); }} disabled={!session.process?.pid}><Skull size={16} /></button>
+          <button type="button" className="icon-button" onClick={(event) => { event.stopPropagation(); actions.onInspectDiff(session); }}><GitCompare size={16} /></button>
+          <button type="button" className="icon-button danger" onClick={(event) => { event.stopPropagation(); actions.onTerminate(session); }} disabled={!session.process?.pid}><Ban size={16} /></button>
         </div>
         <GitSummary
           changedFilesCount={session.changedFilesCount}
@@ -72,6 +86,6 @@ export function SessionCard({
           unstagedCount={session.unstagedCount}
         />
       </div>
-    </button>
+    </article>
   );
 }

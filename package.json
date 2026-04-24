@@ -9,9 +9,14 @@
   "scripts": {
     "dev": "npm --workspace apps/desktop run dev",
     "build": "npm --workspace apps/desktop run build",
-    "lint": "npm --workspace apps/desktop run lint && cargo fmt --all --check",
+    "lint": "npm run lint:frontend && npm run lint:rust",
+    "lint:frontend": "npm --workspace apps/desktop run lint",
+    "lint:rust": "cargo fmt --all --check",
     "format": "npm --workspace apps/desktop run format && cargo fmt --all",
-    "test": "npm --workspace apps/desktop run test && cargo test --workspace",
+    "test": "npm run test:frontend && npm run test:rust",
+    "test:frontend": "npm --workspace apps/desktop run test",
+    "test:rust": "cargo test --workspace",
+    "clippy": "cargo clippy --workspace --all-targets -- -D warnings",
     "tauri:dev": "npm --workspace apps/desktop run tauri:dev",
     "tauri:build": "npm --workspace apps/desktop run tauri:build"
   }

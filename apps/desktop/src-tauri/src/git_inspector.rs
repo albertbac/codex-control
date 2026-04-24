@@ -4,9 +4,17 @@ use std::process::Command;
 use codex_core::GitSnapshot;
 
 pub fn inspect_git(cwd: &str) -> GitSnapshot {
-  let path = if Path::new(cwd).exists() { cwd } else { "." };
+  if !Path::new(cwd).exists() {
+    return GitSnapshot {
+      changed_files_count: 0,
+      staged_count: 0,
+      unstaged_count: 0,
+      diff_stat: None,
+    };
+  }
+
   let status_output = Command::new("git")
-    .args(["-C", path, "status", "--porcelain", "--branch"])
+    .args(["-C", cwd, "status", "--porcelain", "--branch"])
     .output();
 
   let mut changed_files_count = 0usize;
@@ -31,7 +39,7 @@ pub fn inspect_git(cwd: &str) -> GitSnapshot {
   }
 
   let diff_stat = Command::new("git")
-    .args(["-C", path, "diff", "--stat", "--compact-summary", "--no-ext-diff"])
+    .args(["-C", cwd, "diff", "--stat", "--compact-summary", "--no-ext-diff"])
     .output()
     .ok()
     .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_string())
@@ -46,9 +54,12 @@ pub fn inspect_git(cwd: &str) -> GitSnapshot {
 }
 
 pub fn inspect_diff_preview(cwd: &str) -> String {
-  let path = if Path::new(cwd).exists() { cwd } else { "." };
+  if !Path::new(cwd).exists() {
+    return "Workspace path is unavailable.".to_string();
+  }
+
   let diff = Command::new("git")
-    .args(["-C", path, "diff", "--stat", "--compact-summary", "--no-ext-diff"])
+    .args(["-C", cwd, "diff", "--stat", "--compact-summary", "--no-ext-diff"])
     .output()
     .ok()
     .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_string())
@@ -59,7 +70,7 @@ pub fn inspect_diff_preview(cwd: &str) -> String {
   }
 
   Command::new("git")
-    .args(["-C", path, "status", "--short", "--branch"])
+    .args(["-C", cwd, "status", "--short", "--branch"])
     .output()
     .ok()
     .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_string())

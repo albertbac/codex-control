@@ -94,7 +94,7 @@ pub fn settings_info() -> anyhow::Result<SettingsInfo> {
     notes: vec![
       "The desktop app stores data only on the local machine.".to_string(),
       "Hooks are guardrails and session telemetry, not a universal interception layer.".to_string(),
-      "Windows hook workflows are intentionally not documented as production-ready.".to_string(),
+      "Windows hook workflows are not a supported release target yet.".to_string(),
     ],
   })
 }

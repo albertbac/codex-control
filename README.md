@@ -30,7 +30,7 @@ This project exists for the gap between a single terminal window and a full orch
 - It does not send session data to a server.
 - It does not auto-approve Codex permission requests.
 - It does not promise complete shell enforcement.
-- It does not treat Windows hooks as production-ready.
+- It does not treat Windows hooks as a supported release target.
 - It does not replace reviewing diffs before committing.
 
 ## Install from source
@@ -95,9 +95,7 @@ npm install
 npm run lint
 npm run test
 npm run build
-cargo fmt --all --check
-cargo test --workspace
-cargo clippy --workspace --all-targets -- -D warnings
+npm run clippy
 npm run tauri:dev
 ```
 
@@ -116,7 +114,7 @@ More detail is in [docs/security.md](docs/security.md).
 ## Current limitations
 
 - macOS and Linux are the intended targets
-- Windows hooks are not documented as production-ready
+- Windows hooks are not a supported release target yet
 - the desktop UI currently uses polling instead of a push transport
 - session resume is intentionally not exposed as an action until there is a safe local handoff path
 - no verified desktop release artifact is published yet
