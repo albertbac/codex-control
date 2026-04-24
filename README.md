@@ -117,13 +117,13 @@ More detail is in [docs/security.md](docs/security.md).
 - Windows hooks are not a supported release target yet
 - the desktop UI currently uses polling instead of a push transport
 - session resume is intentionally not exposed as an action until there is a safe local handoff path
-- no verified desktop release artifact is published yet
+- no public release artifact is published yet
 
 ## Roadmap
 
 - verify the Rust workspace and Tauri desktop build in CI
 - replace polling with a push update path once the local backend transport is stable
-- add a real desktop screenshot after the first verified build
+- add a real desktop screenshot after a clean desktop capture
 - tighten stale-session handling with better process correlation
 
 ## License

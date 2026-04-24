@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Codex Control icon">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="42%" r="60%">
+      <stop offset="0%" stop-color="#8af7c4"/>
+      <stop offset="42%" stop-color="#2bdfa1"/>
+      <stop offset="100%" stop-color="#04120e"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="96" y1="88" x2="416" y2="424">
+      <stop offset="0%" stop-color="#d9fff1"/>
+      <stop offset="45%" stop-color="#42e6ad"/>
+      <stop offset="100%" stop-color="#0c5f4b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#070b10"/>
+  <circle cx="256" cy="256" r="156" fill="url(#glow)" opacity="0.24"/>
+  <circle cx="256" cy="256" r="146" fill="none" stroke="url(#ring)" stroke-width="24"/>
+  <path d="M174 266c0-57 38-96 89-96 34 0 62 15 79 39l-37 29c-10-14-24-22-41-22-25 0-43 19-43 50 0 30 18 50 44 50 18 0 33-8 43-24l38 27c-18 27-47 43-83 43-51 0-89-39-89-96Z" fill="#f3fff9"/>
+  <path d="M242 128h28v70h-28zM242 314h28v70h-28zM128 242h70v28h-70zM314 242h70v28h-70z" fill="#2bdfa1"/>
+</svg>

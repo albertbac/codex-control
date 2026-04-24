@@ -17,6 +17,12 @@ npm run build
 npm run tauri:dev
 ```
 
+Build a local desktop bundle:
+
+```bash
+npm run tauri:build
+```
+
 ## Install the hook CLI
 
 ```bash

@@ -4,6 +4,7 @@ dist/
 target/
 apps/desktop/dist/
 apps/desktop/node_modules/
+apps/desktop/src-tauri/gen/
 *.db
 *.db-shm
 *.db-wal
