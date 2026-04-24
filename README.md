@@ -46,27 +46,27 @@ Requirements:
 
 Clone and run locally:
 
-```bash
+~~~bash
 git clone https://github.com/albertbac/codex-control.git
 cd codex-control
 npm install
 npm run build
 npm run tauri:dev
-```
+~~~
 
 Build a local desktop bundle:
 
-```bash
+~~~bash
 npm run tauri:build
-```
+~~~
 
 ## Hook setup
 
 Install the hook CLI from the workspace:
 
-```bash
+~~~bash
 cargo install --path packages/hook-cli
-```
+~~~
 
 Copy the example hook configuration into the Codex configuration location you use locally:
 
@@ -77,9 +77,9 @@ The example `config.toml` enables Codex hooks. The example `hooks.json` wires Co
 
 Check the CLI after installation:
 
-```bash
+~~~bash
 codex-control-hook doctor
-```
+~~~
 
 ## Hook CLI contract
 
@@ -94,9 +94,9 @@ The hook CLI reads one JSON object from `stdin` and preserves unknown fields ins
 
 `codex-control-hook ingest --emit-json-response` emits only:
 
-```json
+~~~json
 {"continue":true,"suppressOutput":false}
-```
+~~~
 
 `codex-control-hook policy`:
 
@@ -111,22 +111,22 @@ The full hook contract and examples are in [docs/hooks.md](docs/hooks.md).
 
 Common commands:
 
-```bash
+~~~bash
 npm install
 npm run lint
 npm run test
 npm run build
 npm run clippy
 npm run tauri:dev
-```
+~~~
 
 Rust-only checks:
 
-```bash
+~~~bash
 cargo fmt --all --check
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
-```
+~~~
 
 ## Security model
 

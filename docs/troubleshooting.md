@@ -4,18 +4,18 @@
 
 Check that Codex hooks are enabled.
 
-```toml
+~~~toml
 [features]
 codex_hooks = true
-```
+~~~
 
 Confirm that the hook file is installed in the Codex configuration location you use.
 
 Run:
 
-```bash
+~~~bash
 codex-control-hook doctor
-```
+~~~
 
 ## Hooks are not firing
 
@@ -23,15 +23,15 @@ Confirm that `codex-control-hook` is available in the shell path used by Codex.
 
 Run:
 
-```bash
+~~~bash
 which codex-control-hook
-```
+~~~
 
 If the binary is missing, reinstall it:
 
-```bash
+~~~bash
 cargo install --path packages/hook-cli
-```
+~~~
 
 ## The app opens but stays empty
 
@@ -43,9 +43,9 @@ Existing sessions may not emit all lifecycle events retroactively.
 
 Run:
 
-```bash
+~~~bash
 codex-control-hook doctor
-```
+~~~
 
 If the database path is unavailable, Codex Control should fall back to the local event spool.
 
@@ -63,9 +63,9 @@ Confirm that the session working directory is inside a Git repository.
 
 Run from the session directory:
 
-```bash
+~~~bash
 git rev-parse --show-toplevel
-```
+~~~
 
 If the command fails, the app cannot show branch or diff information for that session.
 
@@ -73,11 +73,11 @@ If the command fails, the app cannot show branch or diff information for that se
 
 Run the checks separately:
 
-```bash
+~~~bash
 npm run build
 npm run lint
 npm run test
 npm run clippy
-```
+~~~
 
 Fix the first failing command before rerunning the full set.

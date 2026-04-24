@@ -14,15 +14,7 @@ Codex Control does not send session data to a hosted service. There is no teleme
 
 Sensitive values are redacted before persistence where they match known patterns.
 
-Redaction covers common cases such as:
-
-* API key-like values
-* bearer credentials
-* authorization headers
-* private key blocks
-* environment-style secret values
-* long high-entropy tokens
-* cookies and session-like values
+Redaction covers common cases such as API key-like values, bearer credentials, authorization headers, private key blocks, environment-style secret values, long high-entropy tokens, cookies, and session-like values.
 
 Redaction is a safety layer, not a guarantee. Review local data before sharing logs or reports.
 
@@ -52,9 +44,9 @@ To delete local data, close the app and remove the local store or spool files co
 
 If unsure, run:
 
-```bash
+~~~bash
 codex-control-hook doctor
-```
+~~~
 
 The doctor command should report status without printing sensitive values.
 
@@ -62,9 +54,9 @@ The doctor command should report status without printing sensitive values.
 
 Review the hook files you installed and confirm that they call the expected binary:
 
-```bash
+~~~bash
 codex-control-hook ingest
 codex-control-hook policy
-```
+~~~
 
 Do not install hook files from an untrusted source.
