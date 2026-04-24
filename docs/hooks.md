@@ -1,44 +1,51 @@
-# Hooks contract
+# Hooks
 
-## stdin contract
+## stdin JSON
 
 `codex-control-hook` reads exactly one JSON object from stdin.
 
-Common fields expected from Codex are:
+Common fields accepted from Codex hook events:
 
 - `session_id`
 - `transcript_path`
 - `cwd`
 - `hook_event_name`
 - `model`
-- `turn_id` when the hook is turn-scoped
+- `turn_id` when present
 
-Unknown fields are preserved under `payload`.
+Unknown fields are preserved under `payload` after normalization.
 
-## stdout behavior
+## `ingest` stdout behavior
 
-### `codex-control-hook ingest`
+`codex-control-hook ingest` succeeds quietly:
 
-- success: stdout stays empty
+- success exit code: `0`
+- stdout on success: empty
 - diagnostics: stderr only
-- exit code on success: `0`
+- raw input: not printed
 
-### `codex-control-hook ingest --emit-json-response`
+This matters because hook stdout may be interpreted by Codex.
 
-Success emits exactly:
+## `ingest --emit-json-response`
+
+When JSON response mode is requested, stdout contains only this JSON value:
 
 ```json
 {"continue":true,"suppressOutput":false}
 ```
 
-### `codex-control-hook policy`
+No explanatory text is printed around it.
+
+## `policy` behavior
+
+`codex-control-hook policy` reads one JSON object from stdin and evaluates the event.
 
 Safe commands:
 
 - exit `0`
 - stdout empty
 
-Denied `PreToolUse` output:
+Destructive `PreToolUse` events are denied with:
 
 ```json
 {
@@ -50,7 +57,7 @@ Denied `PreToolUse` output:
 }
 ```
 
-Denied `PermissionRequest` output:
+Destructive `PermissionRequest` events are denied with:
 
 ```json
 {
@@ -64,6 +71,10 @@ Denied `PermissionRequest` output:
 }
 ```
 
+`PermissionRequest` output does not include `updatedInput`, `updatedPermissions`, or `interrupt`.
+
+The policy command does not auto-approve escalation.
+
 ## Supported events
 
 - `SessionStart`
@@ -72,13 +83,33 @@ Denied `PermissionRequest` output:
 - `PermissionRequest`
 - `PostToolUse`
 - `Stop`
-- unknown events normalize to `Unknown`
+- unknown event names normalize to `Unknown`
 
-## Example local checks
+## Sanitized local examples
+
+Run these from the repository root:
 
 ```bash
-cat packages/hook-cli/tests/fixtures/session_start.json | cargo run -p codex-control-hook -- ingest
-cat packages/hook-cli/tests/fixtures/pre_tool_use.json | cargo run -p codex-control-hook -- policy
-cat packages/hook-cli/tests/fixtures/post_tool_use_failure.json | cargo run -p codex-control-hook -- ingest --emit-json-response
-cargo run -p codex-control-hook -- doctor
+cat packages/hook-cli/tests/fixtures/session_start.json \
+  | cargo run -p codex-control-hook -- ingest
+```
+
+```bash
+cat packages/hook-cli/tests/fixtures/post_tool_use_failure.json \
+  | cargo run -p codex-control-hook -- ingest --emit-json-response
+```
+
+```bash
+cat packages/hook-cli/tests/fixtures/pre_tool_use.json \
+  | cargo run -p codex-control-hook -- policy
+```
+
+## Testing with fixtures
+
+The fixture files under `packages/hook-cli/tests/fixtures/` are intentionally small and sanitized. They are used to verify parsing, unknown-field preservation, status reduction, redaction, and the exact stdout contract.
+
+Run the hook tests with:
+
+```bash
+cargo test -p codex-control-hook
 ```

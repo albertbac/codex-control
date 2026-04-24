@@ -2,123 +2,143 @@
 
 ## Summary
 
-This pass was a final technical, editorial, and exposure audit before public presentation.
+This pass focused on public presentation and structural validity only.
 
-The repository now has verified local Rust, Node, and Tauri checks. The public docs avoid broad claims, the hook contract is covered by tests, and the desktop build now produces a local macOS app bundle.
+No hook behavior was changed. The README, public docs, report, and GitHub Actions workflow were reviewed for raw readability, Markdown/YAML structure, overbroad language, and exposure risk.
 
 ## Files Changed
 
-- `.gitignore`
 - `README.md`
+- `docs/install.md`
+- `docs/architecture.md`
+- `docs/hooks.md`
+- `docs/security.md`
+- `docs/troubleshooting.md`
 - `.github/workflows/ci.yml`
-- `package.json`
-- `Cargo.lock`
-- `apps/desktop/src/components/SessionCard.tsx`
-- `apps/desktop/src/lib/fallbackData.ts`
-- `apps/desktop/src-tauri/tauri.conf.json`
-- `apps/desktop/src-tauri/icons/icon.svg`
-- `apps/desktop/src-tauri/icons/icon.png`
-- Rust files under `apps/desktop/src-tauri/src/`
-- Rust files under `packages/codex-core/src/`
-- Rust files under `packages/hook-cli/src/`
-- `packages/hook-cli/tests/cli.rs`
 - `CODEX_CONTROL_REWRITE_REPORT.md`
+
+## Markdown/YAML Formatting Fixed
+
+- Rewrote the public Markdown files as normal multiline documents with headings, paragraphs, lists, and fenced code blocks.
+- Moved screenshot language into a dedicated `Screenshots` section in the README.
+- Rewrote `.github/workflows/ci.yml` with explicit step names, clear indentation, and multiline shell commands.
+- Validated the workflow YAML with a parser.
+
+Line counts after formatting:
+
+- `README.md`: 157 lines
+- `docs/install.md`: 85 lines
+- `docs/architecture.md`: 106 lines
+- `docs/hooks.md`: 115 lines
+- `docs/security.md`: 62 lines
+- `docs/troubleshooting.md`: 41 lines
+- `.github/workflows/ci.yml`: 61 lines
 
 ## Technical Fixes
 
-- Applied `cargo fmt` across the Rust workspace so CI format checks have the same baseline locally.
-- Added `Cargo.lock`, which is appropriate for this application-style workspace.
-- Added the missing Tauri icon asset required by `tauri::generate_context!()`.
-- Fixed the Tauri `beforeBuildCommand` and `beforeDevCommand` so workspace builds run from the desktop package instead of resolving the wrong package path.
-- Added a CI desktop build step so the workflow checks the Tauri app, not only the web bundle.
-- Ignored Tauri-generated schema files under `apps/desktop/src-tauri/gen/`.
-- Fixed `DashboardSession` construction to match the shared Rust model shape.
-- Fixed missing imports in store tests.
-- Added a `CODEX_CONTROL_DATA_DIR` override so CLI tests can write to an isolated temporary store instead of relying on an OS application directory.
-- Stabilized hook policy JSON output with explicit contract strings for exact stdout tests.
-- Strengthened redaction replacements for authorization headers, cookies, environment-style values, and session-style values.
-- Fixed clippy findings without weakening tests.
-- Kept the invalid nested interactive markup fix in the session card.
-- Kept the safer Git inspection behavior: a missing workspace no longer falls back to inspecting the app repository itself.
+- No product architecture was rewritten.
+- No hook contract code was changed.
+- The CI workflow still runs dependency installation, Rust formatting, Rust tests, Rust clippy, frontend lint, frontend tests, frontend build, and desktop build.
+- No test was removed.
+- No failure masking was added.
+- No `|| true` was added.
 
-## Editorial Cleanup
-
-- `README.md` remains direct and maintainer-written.
-- No public screenshot is claimed.
-- The README now distinguishes local source builds from public release artifacts.
-- Public docs avoid hype, broad production claims, fake badges, and old-product framing.
-
-## Sanitization
+## Exposure Audit
 
 Reviewed surfaces:
 
-- README and docs
-- hook CLI stdout and stderr behavior
-- Tauri command errors
-- fallback UI data
-- hook fixtures
+- README
+- public docs
+- CI workflow
 - report text
-- public UI copy
+- hook contract documentation
+- scan results for code, tests, fixtures, lockfiles, and docs
 
-Retained protections:
+Result:
 
-- hook CLI stderr passes through public-output sanitization
-- desktop runtime errors sanitize sensitive text before returning to the UI
-- transcript inspection errors do not echo raw transcript paths
-- hook doctor does not print full local storage paths
-- timeline result previews are sanitized before display
-- fallback UI data avoids personal-looking paths and destructive commands
+- No real secrets were found in public-facing files.
+- No token, API key, password, private key, cookie value, authorization header value, personal path, complete hook payload, or sensitive command output was added to public docs or the report.
+- Security terms that remain in docs are descriptive and relate to redaction behavior.
+- Security terms that remain in code are part of redaction implementation and tests.
+- Dependency lockfile matches are package metadata, not exposed credentials.
 
-No real secrets, API keys, passwords, authorization headers, private keys, cookie values, or private paths were found in public-facing files.
+## Legacy Scan
+
+Outcome:
+
+- The requested legacy-product search was run.
+- No matches remained after excluding third-party dependencies.
+
+## Public Wording Scan
+
+Outcome:
+
+- The requested public-wording search was run.
+- No public wording problem was found.
+- Retained matches are dependency metadata in `package-lock.json` and Cargo lockfile metadata.
+
+## Secret-Oriented Scan
+
+Outcome:
+
+- The requested secret-oriented search was run.
+- No real secret values were found.
+- Retained matches are documentation of redaction behavior, redaction code, redaction tests, and dependency lockfile metadata.
 
 ## Hook Contract Status
 
 The hook contract was preserved.
 
-Verified behavior:
+Verified by the existing Rust tests:
 
-- `codex-control-hook ingest` exits `0` with empty stdout on success
-- `codex-control-hook ingest` writes diagnostics only to stderr
-- `codex-control-hook ingest --emit-json-response` emits only valid JSON equivalent to `{"continue":true,"suppressOutput":false}`
-- `codex-control-hook policy` denies destructive `PreToolUse` with the required `hookSpecificOutput`
-- `codex-control-hook policy` denies destructive `PermissionRequest` with the required `hookSpecificOutput`
-- `PermissionRequest` output does not include `updatedInput`, `updatedPermissions`, or `interrupt`
-- hook commands do not print prose to stdout when JSON output is required
+- `codex-control-hook ingest` exits `0` and keeps stdout empty on success.
+- `codex-control-hook ingest --emit-json-response` emits only JSON equivalent to `{"continue":true,"suppressOutput":false}`.
+- `codex-control-hook policy` denies destructive `PreToolUse` with the required `hookSpecificOutput` shape.
+- `codex-control-hook policy` denies destructive `PermissionRequest` with the required `hookSpecificOutput` shape.
+- `PermissionRequest` output does not include `updatedInput`, `updatedPermissions`, or `interrupt`.
 
-## Scans
-
-Legacy product scan:
-
-- result: no relevant matches
-
-Public wording scan:
-
-- result: no public problematic matches
-- retained matches are dependency lock metadata and Cargo lock metadata
-
-Secret-oriented scan:
-
-- result: no real secret values found
-- retained matches are schema names, redaction code, tests, fixtures, documentation terms, and dependency metadata
-- destructive command examples remain only in policy tests and hook fixtures because they verify deny behavior
-
-Whitespace scan:
-
-- result: `git diff --check` passed
+No hook behavior was edited in this pass.
 
 ## Commands Run
 
 ### `npm install`
 
-Result: passed
+Outcome: passed.
 
 ```text
-added 63 packages in 378ms
+added 63 packages in 384ms
+```
+
+### `npm run build`
+
+Outcome: passed.
+
+```text
+vite build completed
+1636 modules transformed
+```
+
+### `npm run lint`
+
+Outcome: passed.
+
+```text
+eslint .
+cargo fmt --all --check
+```
+
+### `npm run test`
+
+Outcome: passed.
+
+```text
+Vitest: 1 test passed
+Rust workspace: 18 tests passed
 ```
 
 ### `cargo fmt --all --check`
 
-Result: passed
+Outcome: passed.
 
 ```text
 no output
@@ -126,7 +146,7 @@ no output
 
 ### `cargo test --workspace`
 
-Result: passed
+Outcome: passed.
 
 ```text
 hook CLI tests: 7 passed
@@ -136,89 +156,51 @@ doc tests: 0 failed
 
 ### `cargo clippy --workspace --all-targets -- -D warnings`
 
-Result: passed
+Outcome: passed.
 
 ```text
 Finished dev profile
 ```
 
-### `npm run lint`
+### `.github/workflows/ci.yml` YAML parse
 
-Result: passed
-
-```text
-eslint .
-cargo fmt --all --check
-```
-
-### `npm run test`
-
-Result: passed
+Outcome: passed.
 
 ```text
-Vitest: 1 test passed
-Rust workspace: 18 tests passed
+ci_yml_ok
 ```
 
-### `npm run build`
+### `git diff --check`
 
-Result: passed
+Outcome: passed.
 
 ```text
-vite build completed
-1636 modules transformed
+no output
 ```
 
-### `npm run clippy`
+### GitHub Actions status check
 
-Result: passed
+Command used:
 
-```text
-cargo clippy --workspace --all-targets -- -D warnings
+```bash
+gh run list -R albertbac/codex-control -L 3
 ```
 
-### `npm run tauri:build`
+Outcome:
 
-Initial result: failed
+- Latest remote workflow visible before this commit: success.
+- This local formatting pass still requires a push before GitHub Actions can verify the new commit.
 
-Cause: the Tauri `beforeBuildCommand` resolved to the wrong package directory.
+## Failures
 
-Final result after fix: passed
-
-```text
-Built application
-Finished 1 macOS app bundle
-```
-
-## GitHub Repository Description
-
-Updated through GitHub CLI.
-
-Current description:
-
-```text
-Local visibility for Codex CLI sessions, approvals, hook events, and Git changes.
-```
-
-## CI Status
-
-GitHub Actions passed on commit `773fb2c`.
-
-Remote CI verified:
-
-- Rust format
-- Rust tests
-- Rust clippy
-- frontend lint
-- frontend tests
-- frontend build
-- Tauri desktop build
+No local verification command failed in this pass.
 
 ## Remaining Gaps
 
 - No real desktop screenshot is published yet.
-- No GitHub release artifact is published yet.
+- No public release artifact is published yet.
+- GitHub Actions must run on the commit containing this formatting pass before claiming remote CI for this exact revision.
 
 ## Release Readiness
 
-Release readiness: source release candidate. Public release is still pending a real desktop screenshot and a published release artifact.
+Release readiness: source release candidate, pending a real screenshot, a published release artifact, and GitHub Actions confirmation for the final formatting commit.

@@ -6,21 +6,17 @@ Codex Control gives you a local desktop view of what each Codex session is doing
 
 It is not a cloud service, not a remote controller, and not an analytics layer. It reads local Codex hook events, enriches them with local process and Git state, and keeps the data on your machine.
 
-## Screenshots
-
-No screenshot is published yet. I will add one after the first verified desktop build, not before.
-
 ## Why this exists
 
 When several Codex CLI sessions are open across different repos, it is hard to remember which one is editing code, which one is waiting for approval, and which one already changed files. Codex Control keeps that state visible without sending it anywhere.
 
-This project exists for the gap between a single terminal window and a full orchestration product. If you run Codex in one repo at a time, you probably do not need it. If you keep several sessions alive while you work across branches and workspaces, this becomes useful quickly.
+The target user is a developer who already works with Codex CLI and wants local visibility across sessions without adding a hosted service to the loop.
 
 ## What it shows
 
-- active and recent sessions grouped by repository
+- active and recent Codex sessions grouped by repository
 - session status, model, current working directory, and transcript path
-- the last prompt, the last shell command, and the last assistant message when available
+- last prompt, last shell command, and last assistant message when available
 - approval state for shell actions that require a decision
 - Git context: branch, changed files, staged count, unstaged count, and diff summary
 - a per-session timeline of prompts, hook events, shell actions, approvals, failures, and stops
@@ -33,16 +29,20 @@ This project exists for the gap between a single terminal window and a full orch
 - It does not treat Windows hooks as a supported release target.
 - It does not replace reviewing diffs before committing.
 
+## Screenshots
+
+No screenshot is published yet. I will add one after the first verified desktop build, not before.
+
 ## Install from source
 
-### Prerequisites
+Prerequisites:
 
 - Rust stable toolchain
 - Node.js 20+
 - npm 10+
 - Codex CLI on the same machine
 
-### Clone and run
+Clone and run locally:
 
 ```bash
 git clone https://github.com/albertbac/codex-control.git
@@ -52,43 +52,61 @@ npm run build
 npm run tauri:dev
 ```
 
+Build a local desktop bundle:
+
+```bash
+npm run tauri:build
+```
+
 ## Hook setup
 
-Install the local hook binary:
+Install the hook CLI from the workspace:
 
 ```bash
 cargo install --path packages/hook-cli
 ```
 
-Then copy these files into the Codex configuration you actually use:
+Then copy the example hook configuration into the Codex configuration location you use locally:
 
 - `examples/hooks/config.toml`
 - `examples/hooks/hooks.json`
 
-The example config enables `codex_hooks`. The example hooks file wires Codex hook events into `codex-control-hook`.
+The example `config.toml` enables Codex hooks. The example `hooks.json` wires Codex hook events into `codex-control-hook`.
+
+Check the CLI after installation:
+
+```bash
+codex-control-hook doctor
+```
 
 ## Hook CLI contract
 
-The hook CLI reads a single JSON object from stdin and preserves unknown fields inside `payload` after normalization.
+The hook CLI reads one JSON object from stdin and preserves unknown fields inside `payload` after normalization.
 
-- `codex-control-hook ingest`
-  - exits `0` on success
-  - writes nothing to stdout on success
-  - writes diagnostics to stderr only
-- `codex-control-hook ingest --emit-json-response`
-  - emits only:
+`codex-control-hook ingest`:
+
+- exits `0` on success
+- writes nothing to stdout on success
+- writes diagnostics to stderr only
+- does not print the raw hook input
+
+`codex-control-hook ingest --emit-json-response` emits only:
 
 ```json
 {"continue":true,"suppressOutput":false}
 ```
 
-- `codex-control-hook policy`
-  - denies destructive `PreToolUse` and `PermissionRequest` events with Codex-compatible JSON output
-  - never auto-approves escalation
+`codex-control-hook policy`:
 
-The full contract and examples live in [docs/hooks.md](docs/hooks.md).
+- denies destructive `PreToolUse` and `PermissionRequest` events with Codex-compatible JSON output
+- never auto-approves escalation
+- does not return `updatedInput`, `updatedPermissions`, or `interrupt` for `PermissionRequest`
+
+The full hook contract and examples are in [docs/hooks.md](docs/hooks.md).
 
 ## Development
+
+Common commands:
 
 ```bash
 npm install
@@ -99,12 +117,20 @@ npm run clippy
 npm run tauri:dev
 ```
 
+Rust-only checks:
+
+```bash
+cargo fmt --all --check
+cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
+```
+
 ## Security model
 
 Codex Control is local-first.
 
 - session data stays on disk on the local machine
-- hooks are treated as guardrails and telemetry, not as universal interception
+- hooks are guardrails and telemetry, not universal interception
 - destructive shell activity can be denied where the configured hooks see it
 - transcript parsing is best-effort and never mutates the source transcript
 - secret redaction runs before persistence
@@ -113,18 +139,18 @@ More detail is in [docs/security.md](docs/security.md).
 
 ## Current limitations
 
-- macOS and Linux are the intended targets
-- Windows hooks are not a supported release target yet
-- the desktop UI currently uses polling instead of a push transport
-- session resume is intentionally not exposed as an action until there is a safe local handoff path
-- no public release artifact is published yet
+- macOS and Linux are the intended targets.
+- Windows hooks are not treated as a release target.
+- The desktop UI currently uses polling instead of a push transport.
+- Session resume is not exposed as an action until there is a safe local handoff path.
+- No public release artifact is published yet.
 
 ## Roadmap
 
-- verify the Rust workspace and Tauri desktop build in CI
-- replace polling with a push update path once the local backend transport is stable
-- add a real desktop screenshot after a clean desktop capture
-- tighten stale-session handling with better process correlation
+- keep CI aligned with the local Rust, Node, and Tauri checks
+- replace polling with a local push update path once the desktop runtime transport is settled
+- add a real desktop screenshot after a verified desktop capture
+- improve stale-session handling with better process correlation
 
 ## License
 

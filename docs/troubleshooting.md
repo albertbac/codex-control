@@ -1,37 +1,41 @@
 # Troubleshooting
 
-## Sessions do not appear
+## Hooks do not appear
 
-- run `codex-control-hook doctor`
-- confirm `codex_hooks = true`
-- confirm your `hooks.json` points to `codex-control-hook ingest`
-- verify the session is actually producing local hook events
+- Run `codex-control-hook doctor`.
+- Confirm `codex_hooks = true` in the Codex config you are actually using.
+- Confirm `hooks.json` points to `codex-control-hook ingest`.
+- Restart the Codex session after changing hook configuration.
 
-## Hooks do not fire
+## App starts but shows no sessions
 
-- validate the matcher values in `hooks.json`
-- ensure the hook binary is on `PATH`
-- restart the Codex session after updating hook config
-
-## Permission errors
-
-- ensure the desktop app can read the working directory and transcript path
-- confirm the local data directory is writable
-- on Linux, ensure the terminal and editor commands exist on the system
+- Start a Codex session that uses the configured hooks.
+- Submit a prompt so at least one hook event is emitted.
+- Check the settings view for the active database or spool path.
+- Confirm the desktop app and hook CLI are using the same local data location.
 
 ## Database or spool unavailable
 
-- inspect the settings view for the selected path
-- confirm the parent directory exists and is writable
-- if SQLite fails, Codex Control should fall back to the JSONL spool
+- Confirm the parent directory exists.
+- Confirm the current user can write to that directory.
+- Run `codex-control-hook doctor` for local path checks.
+- If SQLite is unavailable, ingestion should fall back to the JSONL spool.
 
-## Stale sessions remain visible
+## Transcript missing
 
-- stale sessions are only downgraded after process discovery confirms they are gone and no recent hook events were seen
-- use the clear-local-data action if you want to remove old history entirely
+- Missing transcript paths are tolerated.
+- The timeline should still show hook events.
+- Prompt and assistant previews may be incomplete until a transcript is readable.
 
-## Transcript is missing
+## Git not detected
 
-- a missing `transcript_path` is tolerated
-- missing transcripts reduce preview fidelity
-- the dashboard and timeline should still load without the transcript file
+- Confirm the session `cwd` is inside a Git repository.
+- Confirm the `git` executable is on `PATH`.
+- If a workspace was deleted or moved, Git context will be unavailable for that session.
+
+## Local permissions
+
+- The hook CLI needs write access to the local data directory.
+- The desktop app needs read access to the same local data directory.
+- Git and transcript inspection require read access to the working directory.
+- Quick actions that open terminals or editors depend on the local operating system configuration.

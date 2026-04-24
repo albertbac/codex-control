@@ -1,60 +1,85 @@
 # Install
 
-## Prerequisites
+## Requirements
 
 - Rust stable toolchain
-- Node.js 20+
-- npm 10+
-- Codex CLI on the same machine
+- Node.js 20 or newer
+- npm 10 or newer
+- Codex CLI installed on the same machine
+- macOS or Linux for the intended desktop target
 
-## Clone and run the desktop app
+Linux desktop builds also need the native libraries used by Tauri and WebKitGTK. The CI workflow documents the Ubuntu package list used for that environment.
+
+## Install the desktop app from source
+
+Clone the repository and install workspace dependencies:
 
 ```bash
 git clone https://github.com/albertbac/codex-control.git
 cd codex-control
 npm install
-npm run build
+```
+
+Run the development desktop app:
+
+```bash
 npm run tauri:dev
 ```
 
-Build a local desktop bundle:
+Build the web bundle and local desktop bundle:
 
 ```bash
+npm run build
 npm run tauri:build
 ```
 
+No public release artifact is published yet. Until there is one, source builds are the intended path.
+
 ## Install the hook CLI
+
+Install the CLI binary from the local workspace:
 
 ```bash
 cargo install --path packages/hook-cli
 ```
 
-Confirm the binary is available:
+Check that it is available:
 
 ```bash
 codex-control-hook doctor
 ```
 
-## Enable `codex_hooks`
+## Configure Codex hooks
 
-Copy `examples/hooks/config.toml` into the Codex configuration location you use locally and make sure this flag is present:
+Use the example files as a starting point:
+
+- `examples/hooks/config.toml`
+- `examples/hooks/hooks.json`
+
+The config file must enable Codex hooks:
 
 ```toml
 [features]
 codex_hooks = true
 ```
 
-## Place `hooks.json`
+The hooks file should call `codex-control-hook ingest` for session events and `codex-control-hook policy` where shell policy decisions are expected.
 
-Copy `examples/hooks/hooks.json` to the hooks path referenced by your Codex configuration.
+## Verify local operation
 
-## Local data paths
+Run these checks from the repository root:
 
-Typical paths are:
+```bash
+cargo test --workspace
+npm run test
+codex-control-hook doctor
+```
 
-- macOS database: `~/Library/Application Support/CodexControl/codex-control.db`
-- macOS spool: `~/Library/Application Support/CodexControl/spool/events.jsonl`
-- Linux database: `~/.local/share/CodexControl/codex-control.db`
-- Linux spool: `~/.local/share/CodexControl/spool/events.jsonl`
+Then start a Codex session that uses the configured hooks and open the desktop app. New hook events should appear in the dashboard after the session emits events.
 
-The desktop settings view should expose the active data paths used on the current machine.
+## Short troubleshooting
+
+- If sessions do not appear, run `codex-control-hook doctor` and check the hook path.
+- If the desktop app starts but stays empty, confirm the Codex session is using the same hook configuration you edited.
+- If the local store is not writable, fix permissions on the application data directory shown by the settings view.
+- If transcripts are missing, the timeline still loads but preview detail is reduced.
