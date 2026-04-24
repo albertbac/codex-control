@@ -1,1 +1,19 @@
-{"session_id":"session-1","transcript_path":"/tmp/transcript-1.jsonl","cwd":"/tmp/workspaces/repo-a","hook_event_name":"PostToolUse","model":"gpt-5.4","turn_id":"turn-1","tool_name":"Bash","tool_use_id":"tool-1","tool_input":{"command":"cargo test --workspace"},"tool_response":{"success":false,"stdout":"","stderr":"test failure","exit_code":101}}
+{
+  "session_id": "session-1",
+  "transcript_path": "/tmp/transcript-1.jsonl",
+  "cwd": "/tmp/workspaces/repo-a",
+  "hook_event_name": "PostToolUse",
+  "model": "gpt-5.4",
+  "turn_id": "turn-1",
+  "tool_name": "Bash",
+  "tool_use_id": "tool-1",
+  "tool_input": {
+    "command": "cargo test --workspace"
+  },
+  "tool_response": {
+    "success": false,
+    "stdout": "",
+    "stderr": "test failure",
+    "exit_code": 101
+  }
+}

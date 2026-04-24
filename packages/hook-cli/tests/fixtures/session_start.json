@@ -1,1 +1,8 @@
-{"session_id":"session-1","transcript_path":"/tmp/transcript-1.jsonl","cwd":"/tmp/workspaces/repo-a","hook_event_name":"SessionStart","model":"gpt-5.4","source":"startup"}
+{
+  "session_id": "session-1",
+  "transcript_path": "/tmp/transcript-1.jsonl",
+  "cwd": "/tmp/workspaces/repo-a",
+  "hook_event_name": "SessionStart",
+  "model": "gpt-5.4",
+  "source": "startup"
+}

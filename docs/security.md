@@ -1,62 +1,70 @@
 # Security
 
-## Local-only model
+Codex Control is local-first visibility tooling for Codex CLI sessions.
 
-Codex Control keeps session data on the local machine.
+It is not a security sandbox.
 
-It does not require a hosted service, remote controller, or analytics endpoint to operate. The hook CLI writes to local storage, and the desktop app reads from local storage.
+## Local storage
 
-## Telemetry
+Session state is stored on the local machine.
 
-No outbound telemetry is enabled by default.
-
-If future integrations are added, they should be opt-in and documented separately.
+Codex Control does not send session data to a hosted service. There is no telemetry enabled by default.
 
 ## Redaction
 
-Redaction runs before persistence and before local UI previews where applicable.
+Sensitive values are redacted before persistence where they match known patterns.
 
-Current redaction targets include:
+Redaction covers common cases such as:
 
-- likely API keys
-- bearer-style tokens
-- authorization header values
-- cookie header values
-- private key blocks
-- sensitive `.env` assignments
-- long high-entropy token-like strings
+* API key-like values
+* bearer credentials
+* authorization headers
+* private key blocks
+* environment-style secret values
+* long high-entropy tokens
+* cookies and session-like values
 
-Redaction is heuristic. Do not treat it as permission to store or share sensitive data carelessly.
+Redaction is a safety layer, not a guarantee. Review local data before sharing logs or reports.
 
 ## Hook limits
 
-Hooks are guardrails, not a complete security boundary.
+Hooks are useful guardrails. They are not complete enforcement.
 
-- `PreToolUse` can deny matching shell activity before it runs.
-- `PermissionRequest` can deny matching approval requests.
-- `PostToolUse` records what happened but cannot undo effects.
-- Hook coverage depends on the events Codex is configured to emit.
-- Shell policy does not imply universal interception of every tool.
+`PreToolUse` and `PostToolUse` currently focus on Bash-shaped tool events. They do not cover every possible command path, generated script, non-shell tool, or external workflow.
+
+`PostToolUse` runs after the action it observes. It cannot undo side effects.
 
 ## Approval behavior
 
-Codex Control does not auto-approve permission requests.
+Codex Control must not auto-approve permission requests by default.
 
-Destructive requests covered by the policy command are denied. Non-destructive requests fall back to the normal Codex approval flow.
+The policy command denies known destructive requests and otherwise leaves Codex approval flow intact.
 
-## Deleting local data
+## Logs and errors
 
-Delete the local application data directory shown by the settings view, or use the dashboard control that clears the local store when available.
+Public output should not contain raw hook payloads, full private paths, credentials, cookies, authorization headers, or unredacted command text.
 
-Typical locations are listed in [install.md](install.md).
+Diagnostics should be short and sanitized.
 
-## Auditing configuration
+## Data deletion
 
-Before relying on a hook setup, inspect the hook file you pointed Codex to.
+To delete local data, close the app and remove the local store or spool files configured for Codex Control.
 
-Minimum checks:
+If unsure, run:
 
-- `codex-control-hook ingest` is present for the events you want to track.
-- `codex-control-hook policy` is present only where policy decisions are intended.
-- No unexpected shell command runs before or after those entries.
-- The hook binary resolves to the version you installed from this repository.
+```bash
+codex-control-hook doctor
+```
+
+The doctor command should report status without printing sensitive values.
+
+## Auditing hook configuration
+
+Review the hook files you installed and confirm that they call the expected binary:
+
+```bash
+codex-control-hook ingest
+codex-control-hook policy
+```
+
+Do not install hook files from an untrusted source.

@@ -1,1 +1,12 @@
-{"session_id":"session-1","transcript_path":"/tmp/transcript-1.jsonl","cwd":"/tmp/workspaces/repo-a","hook_event_name":"UserPromptSubmit","model":"gpt-5.4","turn_id":"turn-1","prompt":"Summarize the current diff and propose a fix.","unknown_field":{"preserved":true}}
+{
+  "session_id": "session-1",
+  "transcript_path": "/tmp/transcript-1.jsonl",
+  "cwd": "/tmp/workspaces/repo-a",
+  "hook_event_name": "UserPromptSubmit",
+  "model": "gpt-5.4",
+  "turn_id": "turn-1",
+  "prompt": "Summarize the current diff and propose a fix.",
+  "unknown_field": {
+    "preserved": true
+  }
+}

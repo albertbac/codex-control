@@ -1,206 +1,96 @@
-# Codex Control Release Audit
+# Codex Control Rewrite Report
 
 ## Summary
 
-This pass focused on public presentation and structural validity only.
+Codex Control is a local desktop project for visibility into Codex CLI sessions, hook events, approvals, and Git changes.
 
-No hook behavior was changed. The README, public docs, report, and GitHub Actions workflow were reviewed for raw readability, Markdown/YAML structure, overbroad language, and exposure risk.
+This report tracks release readiness. It must stay factual. Do not use it to claim test, build, CI, or release status without evidence.
 
-## Files Changed
+## Public text status
 
-- `README.md`
-- `docs/install.md`
-- `docs/architecture.md`
-- `docs/hooks.md`
-- `docs/security.md`
-- `docs/troubleshooting.md`
-- `.github/workflows/ci.yml`
-- `CODEX_CONTROL_REWRITE_REPORT.md`
+The public README and docs have been rewritten to use direct maintainer language.
 
-## Markdown/YAML Formatting Fixed
+The public docs avoid unsupported claims about hosted services, remote control, production Windows hook support, or complete shell enforcement.
 
-- Rewrote the public Markdown files as normal multiline documents with headings, paragraphs, lists, and fenced code blocks.
-- Moved screenshot language into a dedicated `Screenshots` section in the README.
-- Rewrote `.github/workflows/ci.yml` with explicit step names, clear indentation, and multiline shell commands.
-- Validated the workflow YAML with a parser.
+## Files that require normal formatting
 
-Line counts after formatting:
+These files must remain UTF-8 text with LF line endings:
 
-- `README.md`: 157 lines
-- `docs/install.md`: 85 lines
-- `docs/architecture.md`: 106 lines
-- `docs/hooks.md`: 115 lines
-- `docs/security.md`: 62 lines
-- `docs/troubleshooting.md`: 41 lines
-- `.github/workflows/ci.yml`: 61 lines
+* `README.md`
+* `docs/install.md`
+* `docs/architecture.md`
+* `docs/hooks.md`
+* `docs/security.md`
+* `docs/troubleshooting.md`
+* `.github/workflows/ci.yml`
+* `package.json`
+* `Cargo.toml`
+* `biome.json`
+* `examples/hooks/config.toml`
+* `examples/hooks/hooks.json`
 
-## Technical Fixes
+## Hook contract status
 
-- No product architecture was rewritten.
-- No hook contract code was changed.
-- The CI workflow still runs dependency installation, Rust formatting, Rust tests, Rust clippy, frontend lint, frontend tests, frontend build, and desktop build.
-- No test was removed.
-- No failure masking was added.
-- No `|| true` was added.
+The public hook contract is:
 
-## Exposure Audit
+* `codex-control-hook ingest` exits `0` with empty `stdout` on success.
+* `codex-control-hook ingest --emit-json-response` emits JSON compatible with Codex hook output.
+* `codex-control-hook policy` denies destructive `PreToolUse` events with `hookSpecificOutput`.
+* `codex-control-hook policy` denies destructive `PermissionRequest` events with `hookSpecificOutput`.
+* `codex-control-hook policy` does not auto-approve escalation.
+* `PermissionRequest` output must not include `updatedInput`, `updatedPermissions`, or `interrupt`.
 
-Reviewed surfaces:
+## Security notes
 
-- README
-- public docs
-- CI workflow
-- report text
-- hook contract documentation
-- scan results for code, tests, fixtures, lockfiles, and docs
+The project should not publish secrets, tokens, private keys, cookies, authorization headers, private paths, full hook payloads, or sensitive command text.
 
-Result:
+Docs and reports should use `[REDACTED]` when referring to sensitive examples.
 
-- No real secrets were found in public-facing files.
-- No token, API key, password, private key, cookie value, authorization header value, personal path, complete hook payload, or sensitive command output was added to public docs or the report.
-- Security terms that remain in docs are descriptive and relate to redaction behavior.
-- Security terms that remain in code are part of redaction implementation and tests.
-- Dependency lockfile matches are package metadata, not exposed credentials.
+## Verification commands
 
-## Legacy Scan
-
-Outcome:
-
-- The requested legacy-product search was run.
-- No matches remained after excluding third-party dependencies.
-
-## Public Wording Scan
-
-Outcome:
-
-- The requested public-wording search was run.
-- No public wording problem was found.
-- Retained matches are dependency metadata in `package-lock.json` and Cargo lockfile metadata.
-
-## Secret-Oriented Scan
-
-Outcome:
-
-- The requested secret-oriented search was run.
-- No real secret values were found.
-- Retained matches are documentation of redaction behavior, redaction code, redaction tests, and dependency lockfile metadata.
-
-## Hook Contract Status
-
-The hook contract was preserved.
-
-Verified by the existing Rust tests:
-
-- `codex-control-hook ingest` exits `0` and keeps stdout empty on success.
-- `codex-control-hook ingest --emit-json-response` emits only JSON equivalent to `{"continue":true,"suppressOutput":false}`.
-- `codex-control-hook policy` denies destructive `PreToolUse` with the required `hookSpecificOutput` shape.
-- `codex-control-hook policy` denies destructive `PermissionRequest` with the required `hookSpecificOutput` shape.
-- `PermissionRequest` output does not include `updatedInput`, `updatedPermissions`, or `interrupt`.
-
-No hook behavior was edited in this pass.
-
-## Commands Run
-
-### `npm install`
-
-Outcome: passed.
-
-```text
-added 63 packages in 384ms
-```
-
-### `npm run build`
-
-Outcome: passed.
-
-```text
-vite build completed
-1636 modules transformed
-```
-
-### `npm run lint`
-
-Outcome: passed.
-
-```text
-eslint .
-cargo fmt --all --check
-```
-
-### `npm run test`
-
-Outcome: passed.
-
-```text
-Vitest: 1 test passed
-Rust workspace: 18 tests passed
-```
-
-### `cargo fmt --all --check`
-
-Outcome: passed.
-
-```text
-no output
-```
-
-### `cargo test --workspace`
-
-Outcome: passed.
-
-```text
-hook CLI tests: 7 passed
-codex-core tests: 11 passed
-doc tests: 0 failed
-```
-
-### `cargo clippy --workspace --all-targets -- -D warnings`
-
-Outcome: passed.
-
-```text
-Finished dev profile
-```
-
-### `.github/workflows/ci.yml` YAML parse
-
-Outcome: passed.
-
-```text
-ci_yml_ok
-```
-
-### `git diff --check`
-
-Outcome: passed.
-
-```text
-no output
-```
-
-### GitHub Actions status check
-
-Command used:
+Run these commands before release:
 
 ```bash
-gh run list -R albertbac/codex-control -L 3
+npm install
+npm run build
+npm run lint
+npm run test
+npm run clippy
+cargo fmt --all --check
+cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-Outcome:
+Run these text checks before release:
 
-- Latest remote workflow visible before this commit: success.
-- This local formatting pass still requires a push before GitHub Actions can verify the new commit.
+```bash
+wc -l README.md
+wc -l docs/install.md
+wc -l docs/architecture.md
+wc -l docs/hooks.md
+wc -l docs/security.md
+wc -l docs/troubleshooting.md
+wc -l CODEX_CONTROL_REWRITE_REPORT.md
+wc -l .github/workflows/ci.yml
+```
 
-## Failures
+Run these scans before release:
 
-No local verification command failed in this pass.
+```bash
+rg -n "placeholder|scaffold|AI-generated|generated by|as an AI|TODO|dummy|mock|coming soon|sent to backend|backend will process|business logic|internal engine" .
+rg -n "api[_-]?key|secret|token|bearer|authorization|private key|BEGIN PRIVATE KEY|password|passwd|cookie" .
+rg -n "claude|anthropic|\.claude|claude-control|Claude Control|Claude Code" .
+```
 
-## Remaining Gaps
+Some terms can appear legitimately in security docs, tests, and redaction logic. The release criterion is no public problematic exposure.
 
-- No real desktop screenshot is published yet.
-- No public release artifact is published yet.
-- GitHub Actions must run on the commit containing this formatting pass before claiming remote CI for this exact revision.
+## Release readiness
 
-## Release Readiness
+Not release-ready until:
 
-Release readiness: source release candidate, pending a real screenshot, a published release artifact, and GitHub Actions confirmation for the final formatting commit.
+* the latest GitHub Actions run passes
+* local Rust checks pass
+* local Node checks pass
+* raw GitHub files render as readable multiline text
+* no secret scan finding remains unreviewed
+* a real desktop screenshot or release artifact exists

@@ -1,1 +1,19 @@
-{"session_id":"session-1","transcript_path":"/tmp/transcript-1.jsonl","cwd":"/tmp/workspaces/repo-a","hook_event_name":"PostToolUse","model":"gpt-5.4","turn_id":"turn-1","tool_name":"Bash","tool_use_id":"tool-1","tool_input":{"command":"git status --short"},"tool_response":{"success":true,"stdout":"M src/main.rs","stderr":"","exit_code":0}}
+{
+  "session_id": "session-1",
+  "transcript_path": "/tmp/transcript-1.jsonl",
+  "cwd": "/tmp/workspaces/repo-a",
+  "hook_event_name": "PostToolUse",
+  "model": "gpt-5.4",
+  "turn_id": "turn-1",
+  "tool_name": "Bash",
+  "tool_use_id": "tool-1",
+  "tool_input": {
+    "command": "git status --short"
+  },
+  "tool_response": {
+    "success": true,
+    "stdout": "M src/main.rs",
+    "stderr": "",
+    "exit_code": 0
+  }
+}

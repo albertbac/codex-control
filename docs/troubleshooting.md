@@ -1,41 +1,83 @@
 # Troubleshooting
 
-## Hooks do not appear
+## No sessions appear
 
-- Run `codex-control-hook doctor`.
-- Confirm `codex_hooks = true` in the Codex config you are actually using.
-- Confirm `hooks.json` points to `codex-control-hook ingest`.
-- Restart the Codex session after changing hook configuration.
+Check that Codex hooks are enabled.
 
-## App starts but shows no sessions
+```toml
+[features]
+codex_hooks = true
+```
 
-- Start a Codex session that uses the configured hooks.
-- Submit a prompt so at least one hook event is emitted.
-- Check the settings view for the active database or spool path.
-- Confirm the desktop app and hook CLI are using the same local data location.
+Confirm that the hook file is installed in the Codex configuration location you use.
 
-## Database or spool unavailable
+Run:
 
-- Confirm the parent directory exists.
-- Confirm the current user can write to that directory.
-- Run `codex-control-hook doctor` for local path checks.
-- If SQLite is unavailable, ingestion should fall back to the JSONL spool.
+```bash
+codex-control-hook doctor
+```
 
-## Transcript missing
+## Hooks are not firing
 
-- Missing transcript paths are tolerated.
-- The timeline should still show hook events.
-- Prompt and assistant previews may be incomplete until a transcript is readable.
+Confirm that `codex-control-hook` is available in the shell path used by Codex.
 
-## Git not detected
+Run:
 
-- Confirm the session `cwd` is inside a Git repository.
-- Confirm the `git` executable is on `PATH`.
-- If a workspace was deleted or moved, Git context will be unavailable for that session.
+```bash
+which codex-control-hook
+```
 
-## Local permissions
+If the binary is missing, reinstall it:
 
-- The hook CLI needs write access to the local data directory.
-- The desktop app needs read access to the same local data directory.
-- Git and transcript inspection require read access to the working directory.
-- Quick actions that open terminals or editors depend on the local operating system configuration.
+```bash
+cargo install --path packages/hook-cli
+```
+
+## The app opens but stays empty
+
+Start a fresh Codex CLI session after installing the hook files.
+
+Existing sessions may not emit all lifecycle events retroactively.
+
+## The local store is unavailable
+
+Run:
+
+```bash
+codex-control-hook doctor
+```
+
+If the database path is unavailable, Codex Control should fall back to the local event spool.
+
+Check local filesystem permissions for the configured data directory.
+
+## Transcript is missing
+
+A transcript path is recorded only when Codex provides one.
+
+Transcript files can also be moved, deleted, or restricted by local permissions. The app should tolerate a missing transcript and continue showing session metadata.
+
+## Git data is missing
+
+Confirm that the session working directory is inside a Git repository.
+
+Run from the session directory:
+
+```bash
+git rev-parse --show-toplevel
+```
+
+If the command fails, the app cannot show branch or diff information for that session.
+
+## CI fails locally
+
+Run the checks separately:
+
+```bash
+npm run build
+npm run lint
+npm run test
+npm run clippy
+```
+
+Fix the first failing command before rerunning the full set.

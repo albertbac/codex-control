@@ -1,85 +1,90 @@
 # Install
 
+Codex Control is currently source-first. There is no signed release artifact yet.
+
 ## Requirements
 
-- Rust stable toolchain
-- Node.js 20 or newer
-- npm 10 or newer
-- Codex CLI installed on the same machine
-- macOS or Linux for the intended desktop target
+Install these before building:
 
-Linux desktop builds also need the native libraries used by Tauri and WebKitGTK. The CI workflow documents the Ubuntu package list used for that environment.
+* Rust stable toolchain.
+* Node.js 20 or newer.
+* npm 10 or newer.
+* Codex CLI.
+* Linux desktop dependencies required by Tauri, when building on Linux.
 
-## Install the desktop app from source
+## Desktop app
 
-Clone the repository and install workspace dependencies:
+Clone the repo:
 
 ```bash
 git clone https://github.com/albertbac/codex-control.git
 cd codex-control
+```
+
+Install JavaScript dependencies:
+
+```bash
 npm install
 ```
 
-Run the development desktop app:
+Build the frontend and Rust workspace:
+
+```bash
+npm run build
+npm run test
+npm run clippy
+```
+
+Run the desktop app in development mode:
 
 ```bash
 npm run tauri:dev
 ```
 
-Build the web bundle and local desktop bundle:
+Build a desktop bundle:
 
 ```bash
-npm run build
 npm run tauri:build
 ```
 
-No public release artifact is published yet. Until there is one, source builds are the intended path.
+## Hook CLI
 
-## Install the hook CLI
-
-Install the CLI binary from the local workspace:
+Install the hook CLI from the workspace:
 
 ```bash
 cargo install --path packages/hook-cli
 ```
 
-Check that it is available:
+Verify the binary:
 
 ```bash
 codex-control-hook doctor
 ```
 
-## Configure Codex hooks
+## Codex hook configuration
 
-Use the example files as a starting point:
+The repo includes example files:
 
-- `examples/hooks/config.toml`
-- `examples/hooks/hooks.json`
+* `examples/hooks/config.toml`
+* `examples/hooks/hooks.json`
 
-The config file must enable Codex hooks:
+The `config.toml` file enables Codex hooks:
 
 ```toml
 [features]
 codex_hooks = true
 ```
 
-The hooks file should call `codex-control-hook ingest` for session events and `codex-control-hook policy` where shell policy decisions are expected.
+Place the hook files in the Codex configuration location you use. Common locations are documented by Codex, including the user-level config directory and repo-local config directory.
 
-## Verify local operation
+## Local verification
 
-Run these checks from the repository root:
+After setup, run:
 
 ```bash
-cargo test --workspace
-npm run test
 codex-control-hook doctor
+npm run test
+npm run build
 ```
 
-Then start a Codex session that uses the configured hooks and open the desktop app. New hook events should appear in the dashboard after the session emits events.
-
-## Short troubleshooting
-
-- If sessions do not appear, run `codex-control-hook doctor` and check the hook path.
-- If the desktop app starts but stays empty, confirm the Codex session is using the same hook configuration you edited.
-- If the local store is not writable, fix permissions on the application data directory shown by the settings view.
-- If transcripts are missing, the timeline still loads but preview detail is reduced.
+If the app opens but no sessions appear, check that hooks are enabled and that `codex-control-hook` is available in the shell path used by Codex.

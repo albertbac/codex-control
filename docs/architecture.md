@@ -1,106 +1,75 @@
 # Architecture
 
-## Local flow
+Codex Control is a local desktop app. It does not require a hosted service.
 
-Codex Control has a local-only flow:
+The flow is:
 
-1. Codex CLI emits a hook event.
-2. `codex-control-hook` reads one JSON object from stdin.
-3. The hook CLI normalizes and redacts the event.
-4. The event is persisted to the local store, or to a JSONL spool if the database is unavailable.
-5. The desktop app reads local session data and enriches it with process, Git, and transcript context.
-6. The React UI renders dashboard cards and session timelines.
-
-```mermaid
-flowchart LR
-  Hook["Codex hook"] --> CLI["codex-control-hook"]
-  CLI --> Normalize["normalize + redact"]
-  Normalize --> Store["local SQLite or JSONL spool"]
-  Store --> Runtime["Tauri runtime"]
-  Runtime --> UI["React desktop UI"]
+```text
+Codex hook event
+  -> codex-control-hook
+  -> local store
+  -> desktop app
+  -> session dashboard
 ```
 
-## Hook CLI to store
+## Hook ingestion
 
-The hook CLI is the ingestion boundary. It is intentionally small:
+`codex-control-hook` reads one JSON object from `stdin` for each hook invocation.
 
-- read exactly one JSON object from stdin
-- preserve unknown fields under `payload`
-- apply redaction before persistence
-- exit quietly on successful ingestion
-- write diagnostics to stderr only
+The CLI normalizes the event, redacts sensitive values, stores the result locally, and exits using the Codex-compatible hook contract.
 
-SQLite is the preferred store. JSONL spool is a fallback so hook calls do not fail just because the database is temporarily unavailable.
-
-## Desktop app
-
-The desktop app is a Tauri application with a React frontend.
-
-The Rust runtime exposes commands for:
-
-- dashboard snapshots
-- session timelines
-- Git inspection
-- transcript inspection
-- process discovery
-- local settings and paths
-
-The UI currently polls for updates. A push transport can be added later without changing the hook contract.
-
-## Process discovery
-
-`process_watcher.rs` scans local processes for Codex CLI activity.
-
-Process data is used as enrichment, not as the source of truth. Hook events remain the authoritative session history.
-
-Captured process context is intentionally limited to what the dashboard needs:
-
-- process id
-- current working directory when available
-- parent process when available
-- command line summary
-- approximate process age
+Unknown fields are preserved inside the event payload. Unknown event names are stored as `Unknown` rather than being dropped.
 
 ## Session store
 
-The session store tracks normalized events and reduced session state.
+The session store keeps:
 
-Main records:
+* normalized events
+* session status
+* current working directory
+* repository metadata
+* timestamps
+* last prompt
+* last command
+* last assistant message when available
 
-- events
-- sessions
-- schema migrations
+SQLite is the preferred storage path. A JSONL spool is used when the database is not available.
 
-Session state is reduced from hook events. Stale sessions can be marked `unknown` or `finished` when process discovery no longer sees a process and no recent hook events arrive.
+## Process discovery
+
+Process discovery enriches session state. It is not the only source of truth.
+
+Hooks are the primary event source. Process discovery helps identify active local Codex processes, stale sessions, and local workspace context.
 
 ## Git inspection
 
-`git_inspector.rs` enriches each session with repository state:
+Git inspection is local and best-effort.
 
-- repo root
-- repo name
-- branch
-- changed file count
-- staged count
-- unstaged count
-- diff stat summary
+The app collects:
 
-Git failures do not block the dashboard. A missing or non-Git working directory is reported as unavailable context.
+* repository root
+* branch name
+* changed file count
+* staged count
+* unstaged count
+* diff summary
+
+Git inspection does not modify the repository.
 
 ## Transcript handling
 
-`transcript_parser.rs` reads the transcript path when Codex provides one.
+When Codex provides a transcript path, Codex Control records the path and reads it on a best-effort basis.
 
-Transcript parsing is best-effort:
+Transcript parsing must tolerate missing files, changed formats, and permission errors. It must not mutate the transcript source.
 
-- missing files are tolerated
-- malformed lines are skipped
-- unexpected formats do not stop dashboard rendering
-- transcript files are never modified
+## Desktop update flow
 
-## Technical limits
+The desktop app reads from the local store and shows session state in the UI.
 
-- Hooks observe what Codex is configured to emit; they are not universal shell enforcement.
-- `PostToolUse` cannot undo effects that already happened.
-- Process discovery varies by operating system and local permissions.
-- Windows hook behavior is not treated as a release target.
+The current implementation uses polling. A local push update path is planned after the runtime transport is settled.
+
+## Boundaries
+
+Codex Control is visibility tooling. It is not a remote executor and not a complete security boundary.
+
+Hooks are useful guardrails, but they do not intercept every possible shell or non-shell action.

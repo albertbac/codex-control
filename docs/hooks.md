@@ -1,51 +1,55 @@
 # Hooks
 
-## stdin JSON
+Codex Control integrates with Codex hooks through the `codex-control-hook` CLI.
 
-`codex-control-hook` reads exactly one JSON object from stdin.
+Codex command hooks receive one JSON object on `stdin`. Codex treats exit code `0` with no output as success and continues. For `PreToolUse` and `PermissionRequest`, Codex supports hook-specific JSON output for deny decisions. Codex currently documents `PreToolUse` as Bash-only guardrail behavior rather than full enforcement, and Windows hook support is disabled. See the [OpenAI Codex hooks documentation](https://developers.openai.com/codex/hooks).
 
-Common fields accepted from Codex hook events:
+## Commands
 
-- `session_id`
-- `transcript_path`
-- `cwd`
-- `hook_event_name`
-- `model`
-- `turn_id` when present
+### ingest
 
-Unknown fields are preserved under `payload` after normalization.
+```bash
+codex-control-hook ingest
+```
 
-## `ingest` stdout behavior
+Behavior:
 
-`codex-control-hook ingest` succeeds quietly:
+* reads one JSON object from `stdin`
+* normalizes the event
+* preserves unknown fields
+* redacts sensitive values before persistence
+* stores the event locally
+* exits `0` on success
+* writes nothing to `stdout` on success
+* writes diagnostics to `stderr`
 
-- success exit code: `0`
-- stdout on success: empty
-- diagnostics: stderr only
-- raw input: not printed
+### ingest with JSON response
 
-This matters because hook stdout may be interpreted by Codex.
+```bash
+codex-control-hook ingest --emit-json-response
+```
 
-## `ingest --emit-json-response`
-
-When JSON response mode is requested, stdout contains only this JSON value:
+On success, this emits only:
 
 ```json
 {"continue":true,"suppressOutput":false}
 ```
 
-No explanatory text is printed around it.
+### policy
 
-## `policy` behavior
+```bash
+codex-control-hook policy
+```
 
-`codex-control-hook policy` reads one JSON object from stdin and evaluates the event.
+Behavior:
 
-Safe commands:
+* reads one JSON object from `stdin`
+* denies destructive `PreToolUse` events with Codex-compatible JSON
+* denies destructive `PermissionRequest` events with Codex-compatible JSON
+* does not auto-approve escalation
+* does not print prose to `stdout`
 
-- exit `0`
-- stdout empty
-
-Destructive `PreToolUse` events are denied with:
+For a denied `PreToolUse` event, the output shape is:
 
 ```json
 {
@@ -57,7 +61,7 @@ Destructive `PreToolUse` events are denied with:
 }
 ```
 
-Destructive `PermissionRequest` events are denied with:
+For a denied `PermissionRequest` event, the output shape is:
 
 ```json
 {
@@ -71,45 +75,66 @@ Destructive `PermissionRequest` events are denied with:
 }
 ```
 
-`PermissionRequest` output does not include `updatedInput`, `updatedPermissions`, or `interrupt`.
+`PermissionRequest` output must not include `updatedInput`, `updatedPermissions`, or `interrupt`.
 
-The policy command does not auto-approve escalation.
+## Common input fields
+
+Codex hook input includes common fields such as `session_id`, `transcript_path`, `cwd`, `hook_event_name`, and `model`. Turn-scoped events also include `turn_id` when available.
+
+Codex Control accepts these common fields:
+
+* `session_id`
+* `transcript_path`
+* `cwd`
+* `hook_event_name`
+* `model`
+* `turn_id`
+
+Unknown fields are preserved in the normalized payload.
 
 ## Supported events
 
-- `SessionStart`
-- `UserPromptSubmit`
-- `PreToolUse`
-- `PermissionRequest`
-- `PostToolUse`
-- `Stop`
-- unknown event names normalize to `Unknown`
+Codex Control records these events:
 
-## Sanitized local examples
+* `SessionStart`
+* `UserPromptSubmit`
+* `PreToolUse`
+* `PermissionRequest`
+* `PostToolUse`
+* `Stop`
+* `Unknown`
 
-Run these from the repository root:
+Unknown events are not treated as errors.
+
+## Example hook files
+
+See:
+
+* `examples/hooks/config.toml`
+* `examples/hooks/hooks.json`
+
+The examples use `codex-control-hook ingest` for telemetry and `codex-control-hook policy` for deny decisions.
+
+## Local testing
+
+Use sanitized fixtures when testing locally.
 
 ```bash
-cat packages/hook-cli/tests/fixtures/session_start.json \
-  | cargo run -p codex-control-hook -- ingest
+printf '%s\n' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"SessionStart","model":"example-model","source":"startup"}' \
+  | codex-control-hook ingest
 ```
 
+The command should exit `0` and print nothing to `stdout`.
+
+For JSON response mode:
+
 ```bash
-cat packages/hook-cli/tests/fixtures/post_tool_use_failure.json \
-  | cargo run -p codex-control-hook -- ingest --emit-json-response
+printf '%s\n' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"Stop","model":"example-model"}' \
+  | codex-control-hook ingest --emit-json-response
 ```
 
-```bash
-cat packages/hook-cli/tests/fixtures/pre_tool_use.json \
-  | cargo run -p codex-control-hook -- policy
-```
+Expected output:
 
-## Testing with fixtures
-
-The fixture files under `packages/hook-cli/tests/fixtures/` are intentionally small and sanitized. They are used to verify parsing, unknown-field preservation, status reduction, redaction, and the exact stdout contract.
-
-Run the hook tests with:
-
-```bash
-cargo test -p codex-control-hook
+```json
+{"continue":true,"suppressOutput":false}
 ```
