@@ -118,9 +118,7 @@ The examples use `codex-control-hook ingest` for event capture and `codex-contro
 Use sanitized fixtures when testing locally.
 
 ```bash
-printf '%s
-' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"SessionStart","model":"example-model","source":"startup"}' \
-  | codex-control-hook ingest
+printf '%s\n' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"SessionStart","model":"example-model","source":"startup"}' | codex-control-hook ingest
 ```
 
 The command should exit `0` and print nothing to `stdout`.
@@ -128,9 +126,7 @@ The command should exit `0` and print nothing to `stdout`.
 For JSON response mode:
 
 ```bash
-printf '%s
-' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"Stop","model":"example-model"}' \
-  | codex-control-hook ingest --emit-json-response
+printf '%s\n' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"Stop","model":"example-model"}' | codex-control-hook ingest --emit-json-response
 ```
 
 Expected output:

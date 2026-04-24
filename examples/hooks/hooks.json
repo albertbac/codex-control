@@ -1,8 +1,6 @@
-
-
-
 {
   "hooks": {
+
     "SessionStart": [
       {
         "matcher": "startup|resume",
@@ -15,6 +13,7 @@
         ]
       }
     ],
+
     "UserPromptSubmit": [
       {
         "hooks": [
