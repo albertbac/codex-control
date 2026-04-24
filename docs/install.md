@@ -75,7 +75,7 @@ The `config.toml` file enables Codex hooks:
 codex_hooks = true
 ```
 
-Place the hook files in the Codex configuration location you use. Common locations are documented by Codex, including the user-level config directory and repo-local config directory.
+Place the hook files in the Codex configuration location you use.
 
 ## Local verification
 

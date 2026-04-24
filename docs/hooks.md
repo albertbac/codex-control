@@ -2,7 +2,7 @@
 
 Codex Control integrates with Codex hooks through the `codex-control-hook` CLI.
 
-Codex command hooks receive one JSON object on `stdin`. Codex treats exit code `0` with no output as success and continues. For `PreToolUse` and `PermissionRequest`, Codex supports hook-specific JSON output for deny decisions. Codex currently documents `PreToolUse` as Bash-only guardrail behavior rather than full enforcement, and Windows hook support is disabled. See the [OpenAI Codex hooks documentation](https://developers.openai.com/codex/hooks).
+Codex command hooks receive one JSON object on `stdin`. Codex treats exit code `0` with no output as success and continues. For `PreToolUse` and `PermissionRequest`, Codex supports hook-specific JSON output for deny decisions.
 
 ## Commands
 
@@ -79,8 +79,6 @@ For a denied `PermissionRequest` event, the output shape is:
 
 ## Common input fields
 
-Codex hook input includes common fields such as `session_id`, `transcript_path`, `cwd`, `hook_event_name`, and `model`. Turn-scoped events also include `turn_id` when available.
-
 Codex Control accepts these common fields:
 
 * `session_id`
@@ -113,14 +111,15 @@ See:
 * `examples/hooks/config.toml`
 * `examples/hooks/hooks.json`
 
-The examples use `codex-control-hook ingest` for telemetry and `codex-control-hook policy` for deny decisions.
+The examples use `codex-control-hook ingest` for event capture and `codex-control-hook policy` for deny decisions.
 
 ## Local testing
 
 Use sanitized fixtures when testing locally.
 
 ```bash
-printf '%s\n' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"SessionStart","model":"example-model","source":"startup"}' \
+printf '%s
+' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"SessionStart","model":"example-model","source":"startup"}' \
   | codex-control-hook ingest
 ```
 
@@ -129,7 +128,8 @@ The command should exit `0` and print nothing to `stdout`.
 For JSON response mode:
 
 ```bash
-printf '%s\n' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"Stop","model":"example-model"}' \
+printf '%s
+' '{"session_id":"example","transcript_path":null,"cwd":"/tmp/project","hook_event_name":"Stop","model":"example-model"}' \
   | codex-control-hook ingest --emit-json-response
 ```
 

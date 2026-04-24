@@ -8,13 +8,13 @@ This report tracks release readiness. It must stay factual. Do not use it to cla
 
 ## Public text status
 
-The public README and docs have been rewritten to use direct maintainer language.
+The public README and docs use direct maintainer language.
 
 The public docs avoid unsupported claims about hosted services, remote control, production Windows hook support, or complete shell enforcement.
 
-## Files that require normal formatting
+## Text normalization status
 
-These files must remain UTF-8 text with LF line endings:
+These files were rewritten as UTF-8 text with LF line endings:
 
 * `README.md`
 * `docs/install.md`
@@ -28,6 +28,8 @@ These files must remain UTF-8 text with LF line endings:
 * `biome.json`
 * `examples/hooks/config.toml`
 * `examples/hooks/hooks.json`
+* `.gitattributes`
+* `.editorconfig`
 
 ## Hook contract status
 
@@ -72,6 +74,10 @@ wc -l docs/security.md
 wc -l docs/troubleshooting.md
 wc -l CODEX_CONTROL_REWRITE_REPORT.md
 wc -l .github/workflows/ci.yml
+wc -l package.json
+wc -l Cargo.toml
+wc -l biome.json
+wc -l examples/hooks/hooks.json
 ```
 
 Run these scans before release:
