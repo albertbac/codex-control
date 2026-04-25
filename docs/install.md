@@ -16,50 +16,50 @@ Install these before building:
 
 Clone the repo:
 
-~~~bash
+```bash
 git clone https://github.com/albertbac/codex-control.git
 cd codex-control
-~~~
+```
 
 Install JavaScript dependencies:
 
-~~~bash
+```bash
 npm install
-~~~
+```
 
 Build the frontend and Rust workspace:
 
-~~~bash
+```bash
 npm run build
 npm run test
 npm run clippy
-~~~
+```
 
 Run the desktop app in development mode:
 
-~~~bash
+```bash
 npm run tauri:dev
-~~~
+```
 
 Build a desktop bundle:
 
-~~~bash
+```bash
 npm run tauri:build
-~~~
+```
 
 ## Hook CLI
 
 Install the hook CLI from the workspace:
 
-~~~bash
+```bash
 cargo install --path packages/hook-cli
-~~~
+```
 
 Verify the binary:
 
-~~~bash
+```bash
 codex-control-hook doctor
-~~~
+```
 
 ## Codex hook configuration
 
@@ -70,10 +70,10 @@ The repo includes example files:
 
 The `config.toml` file enables Codex hooks:
 
-~~~toml
+```toml
 [features]
 codex_hooks = true
-~~~
+```
 
 Place the hook files in the Codex configuration location you use.
 
@@ -81,10 +81,10 @@ Place the hook files in the Codex configuration location you use.
 
 After setup, run:
 
-~~~bash
+```bash
 codex-control-hook doctor
 npm run test
 npm run build
-~~~
+```
 
 If the app opens but no sessions appear, check that hooks are enabled and that `codex-control-hook` is available in the shell path used by Codex.

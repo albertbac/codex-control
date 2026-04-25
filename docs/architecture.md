@@ -4,13 +4,13 @@ Codex Control is a local desktop app. It does not require a hosted service.
 
 The flow is:
 
-~~~text
+```text
 Codex hook event
   -> codex-control-hook
   -> local store
   -> desktop app
   -> session dashboard
-~~~
+```
 
 ## Hook ingestion
 
